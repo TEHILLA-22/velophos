@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Velophos — Intelligence Redefined</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --void: #020408;
+  --deep: #060d18;
+  --glass-bg: rgba(255,255,255,0.04);
+  --glass-border: rgba(255,255,255,0.10);
+  --glass-shine: rgba(255,255,255,0.18);
+  --accent: #00e5ff;
+  --accent2: #7b61ff;
+  --accent3: #ff4d6d;
+  --warm: #ffb347;
+  --text: #e8edf5;
+  --muted: rgba(232,237,245,0.45);
+  --font-display: 'Bebas Neue', cursive;
+  --font-body: 'Syne', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{
+  background:var(--void);
+  color:var(--text);
+  font-family:var(--font-body);
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* ── CUSTOM CURSOR ── */
+#cursor{
+  position:fixed;width:12px;height:12px;border-radius:50%;
+  background:var(--accent);pointer-events:none;z-index:9999;
+  mix-blend-mode:screen;transition:transform .1s,opacity .2s;
+  transform:translate(-50%,-50%);box-shadow:0 0 20px var(--accent);
+}
+#cursor-ring{
+  position:fixed;width:36px;height:36px;border-radius:50%;
+  border:1px solid rgba(0,229,255,0.4);pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);transition:transform .18s cubic-bezier(.23,1,.32,1),width .2s,height .2s,border-color .2s;
+}
+body:has(a:hover) #cursor-ring,body:has(button:hover) #cursor-ring{
+  width:56px;height:56px;border-color:var(--accent);
+}
+
+/* ── AMBIENT BACKGROUND ── */
+#ambient{
+  position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;
+}
+.orb{
+  position:absolute;border-radius:50%;filter:blur(80px);opacity:.18;
+  animation:drift 18s ease-in-out infinite alternate;
+}
+.orb1{width:600px;height:600px;background:radial-gradient(circle,#00e5ff,transparent 70%);top:-200px;left:-100px;animation-duration:22s;}
+.orb2{width:500px;height:500px;background:radial-gradient(circle,#7b61ff,transparent 70%);bottom:-150px;right:-100px;animation-duration:18s;animation-delay:-7s;}
+.orb3{width:300px;height:300px;background:radial-gradient(circle,#ff4d6d,transparent 70%);top:40%;left:50%;animation-duration:14s;animation-delay:-4s;}
+@keyframes drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(60px,40px) scale(1.12)}}
+
+/* ── NOISE OVERLAY ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:1;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:.6;
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  padding:20px 48px;display:flex;align-items:center;justify-content:space-between;
+  backdrop-filter:blur(24px) saturate(1.6);
+  background:rgba(2,4,8,0.6);
+  border-bottom:1px solid var(--glass-border);
+  transition:all .4s;
+}
+.nav-logo{
+  font-family:var(--font-display);font-size:28px;letter-spacing:3px;
+  color:var(--text);text-decoration:none;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.nav-links{display:flex;gap:36px;align-items:center;}
+.nav-links a{
+  color:var(--muted);font-size:13px;font-weight:600;letter-spacing:1.5px;
+  text-decoration:none;text-transform:uppercase;
+  transition:color .3s;position:relative;
+}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;
+  background:var(--accent);transition:width .3s;
+}
+.nav-links a:hover{color:var(--accent);}
+.nav-links a:hover::after{width:100%;}
+.nav-cta{
+  padding:10px 26px;border-radius:100px;font-size:13px;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;text-decoration:none;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#000;cursor:pointer;border:none;
+  box-shadow:0 0 30px rgba(0,229,255,0.3);
+  transition:transform .2s,box-shadow .2s;
+}
+.nav-cta:hover{transform:scale(1.04);box-shadow:0 0 50px rgba(0,229,255,0.5);}
+
+/* ── SECTIONS ── */
+section{position:relative;z-index:2;}
+
+/* ── HERO ── */
+#hero{
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:0 48px;text-align:center;
+  padding-top:100px;overflow:hidden;
+}
+.hero-eyebrow{
+  font-family:var(--font-mono);font-size:12px;letter-spacing:4px;
+  color:var(--accent);text-transform:uppercase;margin-bottom:28px;
+  opacity:0;animation:fadeUp .8s .2s forwards;
+}
+.hero-title{
+  font-family:var(--font-display);font-size:clamp(80px,14vw,180px);
+  line-height:.92;letter-spacing:4px;margin-bottom:32px;
+  opacity:0;animation:fadeUp .9s .4s forwards;
+}
+.hero-title .line1{display:block;color:var(--text);}
+.hero-title .line2{
+  display:block;
+  background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 50%,var(--accent3) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-size:200%;animation:gradShift 4s ease infinite;
+}
+@keyframes gradShift{0%{background-position:0%}50%{background-position:100%}100%{background-position:0%}}
+.hero-sub{
+  max-width:540px;font-size:17px;line-height:1.7;color:var(--muted);
+  margin-bottom:52px;opacity:0;animation:fadeUp .9s .6s forwards;
+}
+.hero-actions{
+  display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:center;
+  opacity:0;animation:fadeUp .9s .8s forwards;
+}
+.btn-primary{
+  padding:16px 40px;border-radius:100px;font-family:var(--font-body);
+  font-size:15px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#000;border:none;cursor:pointer;text-decoration:none;display:inline-block;
+  box-shadow:0 0 40px rgba(0,229,255,0.35);
+  transition:transform .25s,box-shadow .25s;
+  position:relative;overflow:hidden;
+}
+.btn-primary::before{
+  content:'';position:absolute;inset:0;background:rgba(255,255,255,0.15);
+  transform:translateX(-100%) skewX(-15deg);transition:transform .4s;
+}
+.btn-primary:hover{transform:scale(1.05);box-shadow:0 0 60px rgba(0,229,255,0.5);}
+.btn-primary:hover::before{transform:translateX(150%) skewX(-15deg);}
+.btn-ghost{
+  padding:16px 40px;border-radius:100px;font-family:var(--font-body);
+  font-size:15px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  background:var(--glass-bg);border:1px solid var(--glass-border);
+  color:var(--text);cursor:pointer;text-decoration:none;display:inline-block;
+  backdrop-filter:blur(12px);transition:border-color .3s,box-shadow .3s;
+}
+.btn-ghost:hover{border-color:var(--accent);box-shadow:0 0 30px rgba(0,229,255,0.2);}
+
+/* ── SCROLL INDICATOR ── */
+.scroll-ind{
+  position:absolute;bottom:40px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  opacity:0;animation:fadeUp .9s 1.2s forwards;
+}
+.scroll-ind span{font-family:var(--font-mono);font-size:10px;letter-spacing:3px;color:var(--muted);}
+.scroll-line{width:1px;height:50px;background:linear-gradient(to bottom,var(--accent),transparent);animation:scrollPulse 2s ease infinite;}
+@keyframes scrollPulse{0%,100%{opacity:.3;transform:scaleY(1)}50%{opacity:1;transform:scaleY(1.1)}}
+
+/* ── STATS TICKER ── */
+.stats-ticker{
+  position:relative;z-index:2;border-top:1px solid var(--glass-border);
+  border-bottom:1px solid var(--glass-border);
+  background:rgba(0,229,255,0.03);padding:20px 0;overflow:hidden;
+}
+.ticker-track{
+  display:flex;gap:0;animation:ticker 24s linear infinite;width:max-content;
+}
+.ticker-item{
+  display:flex;align-items:center;gap:12px;padding:0 60px;white-space:nowrap;
+  font-family:var(--font-mono);font-size:13px;color:var(--muted);
+}
+.ticker-item strong{color:var(--accent);font-size:15px;}
+.ticker-sep{width:4px;height:4px;border-radius:50%;background:var(--accent2);margin:0 24px;}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── GLASS CARD ── */
+.glass-card{
+  background:var(--glass-bg);
+  border:1px solid var(--glass-border);
+  border-radius:24px;
+  backdrop-filter:blur(24px) saturate(1.4);
+  position:relative;overflow:hidden;
+  transition:transform .4s cubic-bezier(.23,1,.32,1),box-shadow .4s,border-color .4s;
+}
+.glass-card::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(135deg,rgba(255,255,255,0.08) 0%,transparent 60%);
+  pointer-events:none;
+}
+.glass-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 30px 80px rgba(0,0,0,0.4),0 0 40px rgba(0,229,255,0.1);
+  border-color:rgba(0,229,255,0.25);
+}
+
+/* ── FEATURES SECTION ── */
+#features{padding:140px 48px;}
+.section-label{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:5px;
+  color:var(--accent);text-transform:uppercase;margin-bottom:20px;
+}
+.section-title{
+  font-family:var(--font-display);font-size:clamp(52px,7vw,88px);
+  line-height:.95;letter-spacing:2px;margin-bottom:72px;
+}
+.features-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:20px;
+  max-width:1200px;margin:0 auto;
+}
+.feat-card{padding:40px 36px;cursor:pointer;}
+.feat-icon{
+  width:52px;height:52px;border-radius:16px;margin-bottom:28px;
+  display:flex;align-items:center;justify-content:center;font-size:24px;
+  background:linear-gradient(135deg,rgba(0,229,255,0.15),rgba(123,97,255,0.15));
+  border:1px solid rgba(0,229,255,0.2);
+}
+.feat-card h3{
+  font-size:21px;font-weight:700;margin-bottom:14px;letter-spacing:.3px;
+}
+.feat-card p{font-size:15px;color:var(--muted);line-height:1.75;}
+
+/* ── DEMO SLIDER ── */
+#demo{padding:120px 48px;text-align:center;}
+.slider-container{
+  position:relative;max-width:900px;margin:60px auto 0;
+  border-radius:32px;overflow:hidden;
+  border:1px solid var(--glass-border);
+  box-shadow:0 40px 120px rgba(0,0,0,0.6),0 0 60px rgba(0,229,255,0.08);
+}
+.slider-track{display:flex;transition:transform .7s cubic-bezier(.77,0,.175,1);}
+.slide{
+  min-width:100%;padding:64px 80px;
+  background:linear-gradient(135deg,rgba(6,13,24,0.95),rgba(2,4,8,0.98));
+  text-align:left;
+}
+.slide-num{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:4px;
+  color:var(--accent);margin-bottom:16px;
+}
+.slide h3{font-family:var(--font-display);font-size:48px;letter-spacing:2px;margin-bottom:20px;}
+.slide p{font-size:16px;color:var(--muted);line-height:1.8;max-width:560px;}
+.slide-code{
+  margin-top:32px;padding:24px 28px;background:rgba(0,0,0,0.5);
+  border-radius:16px;font-family:var(--font-mono);font-size:13px;
+  color:var(--accent);border:1px solid rgba(0,229,255,0.15);line-height:2;
+}
+.slide-code .kw{color:var(--accent2);}
+.slide-code .str{color:var(--warm);}
+.slider-nav{display:flex;gap:12px;justify-content:center;margin-top:32px;}
+.slider-dot{
+  width:8px;height:8px;border-radius:50%;background:var(--glass-border);
+  cursor:pointer;transition:all .3s;border:none;
+}
+.slider-dot.active{width:28px;border-radius:4px;background:var(--accent);}
+.slider-arrows{position:absolute;bottom:28px;right:32px;display:flex;gap:12px;}
+.slider-btn{
+  width:44px;height:44px;border-radius:50%;border:1px solid var(--glass-border);
+  background:var(--glass-bg);color:var(--text);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(12px);font-size:18px;
+  transition:border-color .3s,background .3s;
+}
+.slider-btn:hover{border-color:var(--accent);background:rgba(0,229,255,0.1);}
+
+/* ── HOW IT WORKS ── */
+#how{padding:120px 48px;}
+.how-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;
+  align-items:center;max-width:1200px;margin:0 auto;
+}
+.step-list{display:flex;flex-direction:column;gap:32px;}
+.step{display:flex;gap:24px;align-items:flex-start;cursor:pointer;}
+.step-num{
+  width:48px;height:48px;min-width:48px;border-radius:16px;
+  border:1px solid var(--glass-border);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);font-size:12px;color:var(--muted);
+  transition:all .3s;background:var(--glass-bg);
+}
+.step:hover .step-num{border-color:var(--accent);color:var(--accent);box-shadow:0 0 20px rgba(0,229,255,0.2);}
+.step-content h4{font-size:18px;font-weight:700;margin-bottom:8px;}
+.step-content p{font-size:14px;color:var(--muted);line-height:1.7;}
+.how-visual{
+  height:480px;border-radius:28px;
+  background:linear-gradient(135deg,rgba(0,229,255,0.06),rgba(123,97,255,0.06));
+  border:1px solid var(--glass-border);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.how-visual-inner{text-align:center;}
+.how-visual-icon{
+  font-size:80px;margin-bottom:24px;
+  animation:float 4s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+.how-visual-label{font-family:var(--font-mono);font-size:13px;color:var(--muted);letter-spacing:3px;}
+.how-visual-pulse{
+  position:absolute;width:300px;height:300px;border-radius:50%;
+  border:1px solid rgba(0,229,255,0.1);top:50%;left:50%;
+  transform:translate(-50%,-50%);animation:pulse 3s ease-out infinite;
+}
+.how-visual-pulse:nth-child(2){animation-delay:1s;}
+.how-visual-pulse:nth-child(3){animation-delay:2s;}
+@keyframes pulse{0%{transform:translate(-50%,-50%) scale(.6);opacity:1}100%{transform:translate(-50%,-50%) scale(2);opacity:0}}
+
+/* ── PRICING ── */
+#pricing{padding:120px 48px;text-align:center;}
+.pricing-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:20px;
+  max-width:1100px;margin:60px auto 0;
+}
+.price-card{padding:48px 36px;text-align:left;}
+.price-tier{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:4px;
+  color:var(--muted);text-transform:uppercase;margin-bottom:20px;
+}
+.price-num{
+  font-family:var(--font-display);font-size:64px;letter-spacing:2px;
+  line-height:1;margin-bottom:6px;
+}
+.price-period{font-size:14px;color:var(--muted);margin-bottom:32px;}
+.price-divider{height:1px;background:var(--glass-border);margin-bottom:32px;}
+.price-feature{
+  display:flex;align-items:center;gap:12px;margin-bottom:16px;
+  font-size:14px;color:var(--muted);
+}
+.price-feature .check{color:var(--accent);font-size:16px;}
+.price-card.featured{
+  border-color:rgba(0,229,255,0.35);
+  box-shadow:0 0 60px rgba(0,229,255,0.12),0 30px 80px rgba(0,0,0,0.4);
+}
+.price-badge{
+  display:inline-block;padding:4px 14px;border-radius:100px;
+  font-family:var(--font-mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;
+  font-weight:700;margin-bottom:20px;
+}
+
+/* ── TESTIMONIALS ── */
+#testimonials{padding:120px 48px;overflow:hidden;}
+.testimonials-track{
+  display:flex;gap:24px;animation:testimonialScroll 30s linear infinite;
+  width:max-content;
+}
+.testimonials-track:hover{animation-play-state:paused;}
+.testimonial{
+  width:380px;min-width:380px;padding:40px 36px;flex-shrink:0;
+}
+.t-quote{font-size:15px;line-height:1.8;color:var(--muted);margin-bottom:28px;}
+.t-author{display:flex;align-items:center;gap:14px;}
+.t-avatar{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:16px;color:#000;
+}
+.t-name{font-weight:700;font-size:15px;margin-bottom:2px;}
+.t-role{font-size:12px;color:var(--muted);font-family:var(--font-mono);}
+.t-stars{color:var(--warm);font-size:14px;margin-bottom:16px;letter-spacing:2px;}
+@keyframes testimonialScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── CTA ── */
+#cta{
+  padding:140px 48px;text-align:center;
+  background:linear-gradient(180deg,transparent,rgba(0,229,255,0.04) 50%,transparent);
+  border-top:1px solid var(--glass-border);
+  border-bottom:1px solid var(--glass-border);
+}
+#cta .section-title{font-size:clamp(52px,8vw,100px);}
+.cta-email{
+  font-family:var(--font-mono);font-size:15px;color:var(--accent);
+  margin-top:20px;display:block;text-decoration:none;
+  opacity:.7;transition:opacity .3s;
+}
+.cta-email:hover{opacity:1;}
+
+/* ── FOOTER ── */
+footer{
+  position:relative;padding:60px 48px 48px;z-index:2;
+  border-top:1px solid var(--glass-border);
+}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:60px;}
+.footer-brand .logo{
+  font-family:var(--font-display);font-size:36px;letter-spacing:3px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  display:block;margin-bottom:16px;
+}
+.footer-brand p{font-size:14px;color:var(--muted);line-height:1.75;max-width:280px;}
+.footer-col h5{
+  font-size:11px;letter-spacing:4px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:20px;font-family:var(--font-mono);
+}
+.footer-col a{
+  display:block;color:var(--muted);font-size:14px;text-decoration:none;
+  margin-bottom:12px;transition:color .3s;
+}
+.footer-col a:hover{color:var(--text);}
+.footer-bottom{
+  display:flex;justify-content:space-between;align-items:center;
+  padding-top:40px;border-top:1px solid var(--glass-border);
+  font-family:var(--font-mono);font-size:12px;color:var(--muted);
+}
+.footer-jet-base{
+  position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:120px;height:8px;background:linear-gradient(90deg,transparent,var(--accent),var(--accent2),transparent);
+  border-radius:100px;opacity:.5;
+  box-shadow:0 0 30px var(--accent);
+}
+
+/* ── FLYING JET ── */
+#jet{
+  position:fixed;z-index:500;pointer-events:none;
+  width:180px;
+  transition:none;
+  display:block;
+}
+@media(max-width:768px){#jet,#cursor,#cursor-ring{display:none!important;}}
+
+/* ── JET MODAL (tooltip) ── */
+.jet-modal{
+  position:fixed;z-index:501;pointer-events:all;
+  background:rgba(6,13,24,0.92);border:1px solid rgba(0,229,255,0.25);
+  border-radius:18px;padding:20px 24px;min-width:200px;
+  backdrop-filter:blur(24px);
+  box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 30px rgba(0,229,255,0.12);
+  display:none;
+}
+.jet-modal.visible{display:block;animation:popIn .25s cubic-bezier(.23,1,.32,1);}
+@keyframes popIn{0%{transform:scale(0.85);opacity:0}100%{transform:scale(1);opacity:1}}
+.jet-modal-title{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:3px;
+  color:var(--accent);text-transform:uppercase;margin-bottom:12px;
+}
+.jet-modal a{
+  display:flex;align-items:center;gap:10px;padding:10px 0;
+  color:var(--text);text-decoration:none;font-size:14px;font-weight:600;
+  border-bottom:1px solid rgba(255,255,255,0.06);transition:color .2s;
+}
+.jet-modal a:last-child{border-bottom:none;}
+.jet-modal a:hover{color:var(--accent);}
+.jet-modal a span{font-size:16px;}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{0%{opacity:0;transform:translateY(28px)}100%{opacity:1;transform:translateY(0)}}
+.reveal{
+  opacity:0;transform:translateY(32px);
+  transition:opacity .8s cubic-bezier(.23,1,.32,1),transform .8s cubic-bezier(.23,1,.32,1);
+}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-delay-1{transition-delay:.15s}
+.reveal-delay-2{transition-delay:.3s}
+.reveal-delay-3{transition-delay:.45s}
+
+/* ── LIQUID GLASS HIGHLIGHT ── */
+.liquid-highlight{
+  position:absolute;
+  background:radial-gradient(ellipse,rgba(255,255,255,0.12) 0%,transparent 70%);
+  width:200px;height:200px;border-radius:50%;
+  pointer-events:none;transform:translate(-50%,-50%);
+  transition:opacity .3s;opacity:0;
+}
+.glass-card:hover .liquid-highlight{opacity:1;}
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- AMBIENT BACKGROUND -->
+<div id="ambient">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<!-- ── NAV ── -->
+<nav>
+  <a href="#" class="nav-logo">VELOPHOS</a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#demo">Demo</a>
+    <a href="#pricing">Pricing</a>
+    <a href="/docs">Docs</a>
+    <a href="/blog">Blog</a>
+    <a href="/login">Login</a>
+  </div>
+  <a href="/signup" class="nav-cta">Get Started</a>
+</nav>
+
+<!-- ── FLYING JET ── -->
+<div id="jet">
+<svg viewBox="0 0 180 80" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 0 12px rgba(0,229,255,0.7)) drop-shadow(0 0 4px #fff);">
+  <!-- Body -->
+  <path d="M10 40 Q60 15 150 38 Q60 62 10 40Z" fill="url(#jb)" opacity="0.92"/>
+  <!-- Cockpit glass -->
+  <path d="M110 38 Q130 30 152 38 Q130 46 110 38Z" fill="rgba(0,229,255,0.45)" stroke="rgba(0,229,255,0.5)" stroke-width="0.5"/>
+  <!-- Top wing -->
+  <path d="M60 37 L90 10 L100 37Z" fill="rgba(0,229,255,0.25)" stroke="rgba(0,229,255,0.4)" stroke-width="0.5"/>
+  <!-- Bottom wing -->
+  <path d="M60 43 L90 70 L100 43Z" fill="rgba(0,229,255,0.15)" stroke="rgba(0,229,255,0.3)" stroke-width="0.5"/>
+  <!-- Small tail fins -->
+  <path d="M20 38 L10 28 L18 38Z" fill="rgba(123,97,255,0.5)"/>
+  <path d="M20 42 L10 52 L18 42Z" fill="rgba(123,97,255,0.5)"/>
+  <!-- Engine glow -->
+  <ellipse cx="12" cy="40" rx="6" ry="4" fill="url(#eg)" opacity="0.9"/>
+  <!-- Engine trail particles -->
+  <circle cx="5" cy="39" r="1.5" fill="var(--accent)" opacity="0.7"/>
+  <circle cx="-2" cy="40" r="1" fill="var(--accent)" opacity="0.4"/>
+  <!-- Highlight line -->
+  <path d="M80 32 Q120 28 148 36" stroke="rgba(255,255,255,0.3)" stroke-width="0.8" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="jb" x1="10" y1="40" x2="160" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1a2a4a"/>
+      <stop offset="40%" stop-color="#2a4060"/>
+      <stop offset="100%" stop-color="#3a6080"/>
+    </linearGradient>
+    <radialGradient id="eg" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#00e5ff"/>
+      <stop offset="100%" stop-color="#7b61ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+</svg>
+</div>
+
+<!-- JET MODAL -->
+<div class="jet-modal" id="jetModal">
+  <div class="jet-modal-title">▸ Quick Nav</div>
+  <a href="/login"><span>🔐</span> Login</a>
+  <a href="/signup"><span>🚀</span> Sign Up</a>
+  <a href="/docs"><span>📚</span> Docs</a>
+  <a href="#pricing"><span>💎</span> Pricing</a>
+  <a href="#demo"><span>⚡</span> Live Demo</a>
+  <a href="mailto:odjojitehilla@gmail.com"><span>✉️</span> Contact</a>
+</div>
+
+<!-- ── HERO ── -->
+<section id="hero">
+  <div class="hero-eyebrow">v1.0 — Now in Beta · AI reimagined</div>
+  <h1 class="hero-title">
+    <span class="line1">INTEL</span>
+    <span class="line2">LIGENCE</span>
+    <span class="line1">REDEFINED</span>
+  </h1>
+  <p class="hero-sub">
+    Velophos is a next-generation AI system built for precision, speed, and deep contextual understanding. Not just a chatbot — a cognitive partner.
+  </p>
+  <div class="hero-actions">
+    <a href="/signup" class="btn-primary">Start Free Trial</a>
+    <a href="#demo" class="btn-ghost">Watch Demo</a>
+  </div>
+  <div class="scroll-ind">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ── TICKER ── -->
+<div class="stats-ticker">
+  <div class="ticker-track" id="tickerTrack">
+    <div class="ticker-item"><strong>2.4B+</strong> Parameters · Locally Runnable</div>
+    <div class="ticker-sep"></div>
+    <div class="ticker-item"><strong>&lt; 800ms</strong> Average Response</div>
+    <div class="ticker-sep"></div>
+    <div class="ticker-item"><strong>128K</strong> Context Window</div>
+    <div class="ticker-sep"></div>
+    <div class="ticker-item"><strong>AES-256</strong> Encrypted Memory</div>
+    <div class="ticker-sep"></div>
+    <div class="ticker-item"><strong>RAG + VectorDB</strong> Powered Recall</div>
+    <div class="ticker-sep"></div>
+    <div class="ticker-item"><strong>99.97%</strong> Uptime SLA</div>
+    <div class="ticker-sep"></div>
+    <div class="ticker-item"><strong>Open Source</strong> Core Model</div>
+    <div class="ticker-sep"></div>
+    <!-- duplicate for seamless loop -->
+    <div class="ticker-item"><strong>2.4B+</strong> Parameters · Locally Runnable</div>
+    <div class="ticker-sep"></div>
+    <div class="ticker-item"><strong>&lt; 800ms</strong> Average Response</div>
+    <div class="ticker-sep"></div>
+    <div class="ticker-item"><strong>128K</strong> Context Window</div>
+    <div class="ticker-sep"></div>
+    <div class="ticker-item"><strong>AES-256</strong> Encrypted Memory</div>
+    <div class="ticker-sep"></div>
+    <div class="ticker-item"><strong>RAG + VectorDB</strong> Powered Recall</div>
+    <div class="ticker-sep"></div>
+    <div class="ticker-item"><strong>99.97%</strong> Uptime SLA</div>
+    <div class="ticker-sep"></div>
+    <div class="ticker-item"><strong>Open Source</strong> Core Model</div>
+    <div class="ticker-sep"></div>
+  </div>
+</div>
+
+<!-- ── FEATURES ── -->
+<section id="features">
+  <div style="max-width:1200px;margin:0 auto;">
+    <div class="section-label reveal">Core Architecture</div>
+    <h2 class="section-title reveal reveal-delay-1">Built Different<br/>By Design</h2>
+    <div class="features-grid">
+      <div class="glass-card feat-card reveal" style="cursor:default">
+        <div class="liquid-highlight"></div>
+        <div class="feat-icon">🧠</div>
+        <h3>Contextual Memory</h3>
+        <p>ChromaDB-powered vector memory recalls semantically relevant context from past conversations — not just recent messages.</p>
+      </div>
+      <div class="glass-card feat-card reveal reveal-delay-1">
+        <div class="liquid-highlight"></div>
+        <div class="feat-icon">⚡</div>
+        <h3>Low-Latency Inference</h3>
+        <p>Optimized quantized models via llama.cpp run entirely on CPU, delivering &lt;1s responses on commodity hardware.</p>
+      </div>
+      <div class="glass-card feat-card reveal reveal-delay-2">
+        <div class="liquid-highlight"></div>
+        <div class="feat-icon">🔐</div>
+        <h3>End-to-End Security</h3>
+        <p>TLS transport, AES-256 data at rest, HMAC-signed JWTs, and bcrypt password hashing at every layer.</p>
+      </div>
+      <div class="glass-card feat-card reveal reveal-delay-1">
+        <div class="liquid-highlight"></div>
+        <div class="feat-icon">🌐</div>
+        <h3>Open Source Core</h3>
+        <p>Built on Mistral, LLaMA, and Phi-3 family models. Own your weights, own your data. No cloud dependency required.</p>
+      </div>
+      <div class="glass-card feat-card reveal reveal-delay-2">
+        <div class="liquid-highlight"></div>
+        <div class="feat-icon">🔬</div>
+        <h3>Deep Learning Pipeline</h3>
+        <p>RAG retrieval, prompt engineering, and LoRA fine-tuning hooks ready for Phase 2 custom model training.</p>
+      </div>
+      <div class="glass-card feat-card reveal reveal-delay-3">
+        <div class="liquid-highlight"></div>
+        <div class="feat-icon">🛠️</div>
+        <h3>Developer First</h3>
+        <p>REST API, Python SDK, and Next.js frontend. Full OpenAPI docs, webhooks, and streaming response support.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── DEMO SLIDER ── -->
+<section id="demo">
+  <div class="section-label reveal">Live Preview</div>
+  <h2 class="section-title reveal reveal-delay-1">See It In Action</h2>
+  <div class="slider-container reveal reveal-delay-2">
+    <div class="slider-track" id="sliderTrack">
+
+      <div class="slide">
+        <div class="slide-num">01 / 04</div>
+        <h3>Instant Context</h3>
+        <p>Ask about something you discussed 3 weeks ago. Velophos retrieves the exact context using semantic similarity — not keyword search.</p>
+        <div class="slide-code">
+          <span class="kw">await</span> velophos.<span class="kw">chat</span>(<span class="str">"What was my last project idea?"</span>)<br/>
+          <span style="color:var(--muted)">// Retrieves: "Python CLI tool for log analysis" — from 3 weeks ago</span>
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-num">02 / 04</div>
+        <h3>Multi-modal RAG</h3>
+        <p>Feed it PDFs, URLs, or raw text. It chunks, embeds, and retrieves relevant passages automatically — your private knowledge base.</p>
+        <div class="slide-code">
+          <span class="kw">await</span> velophos.<span class="kw">ingest</span>({ source: <span class="str">"./whitepaper.pdf"</span> })<br/>
+          <span class="kw">await</span> velophos.<span class="kw">query</span>(<span class="str">"Summarize key findings"</span>)
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-num">03 / 04</div>
+        <h3>Streaming Responses</h3>
+        <p>Token-by-token streaming over WebSockets or Server-Sent Events. No waiting for the full response — it feels alive.</p>
+        <div class="slide-code">
+          <span class="kw">const</span> stream = velophos.<span class="kw">stream</span>(<span class="str">"Explain quantum entanglement"</span>)<br/>
+          <span class="kw">for await</span> (<span class="kw">const</span> token <span class="kw">of</span> stream) process.stdout.<span class="kw">write</span>(token)
+        </div>
+      </div>
+
+      <div class="slide">
+        <div class="slide-num">04 / 04</div>
+        <h3>Fine-Tune Ready</h3>
+        <p>Phase 2 includes LoRA fine-tuning on your own conversation data. Transform the base model into your domain-specific expert.</p>
+        <div class="slide-code">
+          <span class="kw">await</span> velophos.<span class="kw">finetune</span>({<br/>
+          &nbsp;&nbsp;dataset: <span class="str">"./my-conversations.jsonl"</span>,<br/>
+          &nbsp;&nbsp;epochs: <span class="str">3</span>, method: <span class="str">"lora"</span><br/>
+          })
+        </div>
+      </div>
+
+    </div>
+    <div class="slider-arrows">
+      <button class="slider-btn" id="prevSlide">←</button>
+      <button class="slider-btn" id="nextSlide">→</button>
+    </div>
+  </div>
+  <div class="slider-nav" id="sliderNav">
+    <button class="slider-dot active"></button>
+    <button class="slider-dot"></button>
+    <button class="slider-dot"></button>
+    <button class="slider-dot"></button>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section id="how">
+  <div class="how-grid">
+    <div>
+      <div class="section-label reveal">The System</div>
+      <h2 class="section-title reveal reveal-delay-1" style="font-size:clamp(44px,5vw,72px)">How Velophos Thinks</h2>
+      <div class="step-list">
+        <div class="step reveal reveal-delay-1">
+          <div class="step-num">01</div>
+          <div class="step-content">
+            <h4>Receive &amp; Embed</h4>
+            <p>Your message is embedded into a 384-dimension semantic vector using sentence-transformers running locally.</p>
+          </div>
+        </div>
+        <div class="step reveal reveal-delay-2">
+          <div class="step-num">02</div>
+          <div class="step-content">
+            <h4>Memory Retrieval</h4>
+            <p>ChromaDB performs cosine similarity search across your entire conversation history to retrieve the most relevant context.</p>
+          </div>
+        </div>
+        <div class="step reveal reveal-delay-3">
+          <div class="step-num">03</div>
+          <div class="step-content">
+            <h4>Context Assembly</h4>
+            <p>Retrieved memories + current message are assembled into an optimized prompt that fits the model's context window.</p>
+          </div>
+        </div>
+        <div class="step reveal" style="transition-delay:.6s">
+          <div class="step-num">04</div>
+          <div class="step-content">
+            <h4>Inference &amp; Stream</h4>
+            <p>The local LLM generates a token-streamed response. The exchange is then embedded and stored back into memory.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="how-visual reveal reveal-delay-2">
+      <div class="how-visual-pulse"></div>
+      <div class="how-visual-pulse"></div>
+      <div class="how-visual-pulse"></div>
+      <div class="how-visual-inner">
+        <div class="how-visual-icon">🧬</div>
+        <div class="how-visual-label">Semantic Processing Core</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRICING ── -->
+<section id="pricing">
+  <div class="section-label reveal">Transparent Pricing</div>
+  <h2 class="section-title reveal reveal-delay-1">Simple. Honest.<br/>No Surprises.</h2>
+  <div class="pricing-grid">
+    <div class="glass-card price-card reveal">
+      <div class="price-tier">Starter</div>
+      <div class="price-num">$0</div>
+      <div class="price-period">Forever free</div>
+      <div class="price-divider"></div>
+      <div class="price-feature"><span class="check">✓</span> 100 messages / day</div>
+      <div class="price-feature"><span class="check">✓</span> 7-day memory window</div>
+      <div class="price-feature"><span class="check">✓</span> Phi-3 Mini model</div>
+      <div class="price-feature"><span class="check">✓</span> REST API access</div>
+      <div class="price-feature" style="opacity:.35"><span>—</span> Custom fine-tuning</div>
+      <br/>
+      <a href="/signup" class="btn-ghost" style="display:inline-block;padding:14px 32px;font-size:14px;">Get Started</a>
+    </div>
+    <div class="glass-card price-card featured reveal reveal-delay-1">
+      <div class="price-badge">Most Popular</div>
+      <div class="price-tier">Pro</div>
+      <div class="price-num" style="background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">$29</div>
+      <div class="price-period">per month</div>
+      <div class="price-divider"></div>
+      <div class="price-feature"><span class="check">✓</span> Unlimited messages</div>
+      <div class="price-feature"><span class="check">✓</span> Infinite memory</div>
+      <div class="price-feature"><span class="check">✓</span> Mistral 7B model</div>
+      <div class="price-feature"><span class="check">✓</span> Streaming API</div>
+      <div class="price-feature"><span class="check">✓</span> Priority inference</div>
+      <br/>
+      <a href="/signup" class="btn-primary" style="display:inline-block;padding:14px 32px;font-size:14px;">Start Pro Trial</a>
+    </div>
+    <div class="glass-card price-card reveal reveal-delay-2">
+      <div class="price-tier">Enterprise</div>
+      <div class="price-num">Custom</div>
+      <div class="price-period">Contact us</div>
+      <div class="price-divider"></div>
+      <div class="price-feature"><span class="check">✓</span> Custom fine-tuning</div>
+      <div class="price-feature"><span class="check">✓</span> On-premise deploy</div>
+      <div class="price-feature"><span class="check">✓</span> RBAC &amp; SSO</div>
+      <div class="price-feature"><span class="check">✓</span> SLA guarantee</div>
+      <div class="price-feature"><span class="check">✓</span> Dedicated support</div>
+      <br/>
+      <a href="mailto:odjojitehilla@gmail.com" class="btn-ghost" style="display:inline-block;padding:14px 32px;font-size:14px;">Contact Sales</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── TESTIMONIALS ── -->
+<section id="testimonials">
+  <div style="max-width:1200px;margin:0 auto;">
+    <div class="section-label reveal" style="margin-bottom:60px;">What They're Saying</div>
+  </div>
+  <div style="overflow:hidden">
+    <div class="testimonials-track" id="testimonialTrack">
+      <div class="glass-card testimonial"><div class="t-stars">★★★★★</div><div class="t-quote">"Velophos remembered a product spec I mentioned two weeks ago without me referencing it. That kind of contextual depth is unprecedented."</div><div class="t-author"><div class="t-avatar">AK</div><div><div class="t-name">Amara Kosi</div><div class="t-role">CTO · TechBridge NG</div></div></div></div>
+      <div class="glass-card testimonial"><div class="t-stars">★★★★★</div><div class="t-quote">"The local inference is a game changer. No API costs, no data leaving my machine. For enterprise, this is the only responsible choice."</div><div class="t-author"><div class="t-avatar">EO</div><div><div class="t-name">Emeka Okafor</div><div class="t-role">ML Engineer · DataPulse</div></div></div></div>
+      <div class="glass-card testimonial"><div class="t-stars">★★★★★</div><div class="t-quote">"The RAG pipeline is surgical. I fed it our entire documentation and it started answering support tickets better than our team. Wild."</div><div class="t-author"><div class="t-avatar">SF</div><div><div class="t-name">Sade Fashola</div><div class="t-role">Founder · LaunchpadHQ</div></div></div></div>
+      <div class="glass-card testimonial"><div class="t-stars">★★★★★</div><div class="t-quote">"I've used GPT-4, Claude, Gemini — Velophos is the first one that actually feels like it knows me. The memory layer is real magic."</div><div class="t-author"><div class="t-avatar">TI</div><div><div class="t-name">Tunde Ihejirika</div><div class="t-role">Product Lead · Kora</div></div></div></div>
+      <!-- duplicate -->
+      <div class="glass-card testimonial"><div class="t-stars">★★★★★</div><div class="t-quote">"Velophos remembered a product spec I mentioned two weeks ago without me referencing it. That kind of contextual depth is unprecedented."</div><div class="t-author"><div class="t-avatar">AK</div><div><div class="t-name">Amara Kosi</div><div class="t-role">CTO · TechBridge NG</div></div></div></div>
+      <div class="glass-card testimonial"><div class="t-stars">★★★★★</div><div class="t-quote">"The local inference is a game changer. No API costs, no data leaving my machine. For enterprise, this is the only responsible choice."</div><div class="t-author"><div class="t-avatar">EO</div><div><div class="t-name">Emeka Okafor</div><div class="t-role">ML Engineer · DataPulse</div></div></div></div>
+      <div class="glass-card testimonial"><div class="t-stars">★★★★★</div><div class="t-quote">"The RAG pipeline is surgical. I fed it our entire documentation and it started answering support tickets better than our team. Wild."</div><div class="t-author"><div class="t-avatar">SF</div><div><div class="t-name">Sade Fashola</div><div class="t-role">Founder · LaunchpadHQ</div></div></div></div>
+      <div class="glass-card testimonial"><div class="t-stars">★★★★★</div><div class="t-quote">"I've used GPT-4, Claude, Gemini — Velophos is the first one that actually feels like it knows me. The memory layer is real magic."</div><div class="t-author"><div class="t-avatar">TI</div><div><div class="t-name">Tunde Ihejirika</div><div class="t-role">Product Lead · Kora</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section id="cta">
+  <div class="section-label reveal">Ready?</div>
+  <h2 class="section-title reveal reveal-delay-1">Start Building<br/>Your AI Today</h2>
+  <div class="hero-actions reveal reveal-delay-2" style="margin-top:48px;">
+    <a href="/signup" class="btn-primary">Create Free Account</a>
+    <a href="mailto:odjojitehilla@gmail.com" class="btn-ghost">Talk to Founder</a>
+  </div>
+  <a href="mailto:odjojitehilla@gmail.com" class="cta-email reveal reveal-delay-3">odjojitehilla@gmail.com</a>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer id="footer">
+  <div class="footer-jet-base" id="jetBase"></div>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <span class="logo">VELOPHOS</span>
+      <p>Next-generation AI built for precision, memory, and real-world deployment. Intelligence that remembers. Speed that doesn't compromise.</p>
+      <div style="margin-top:24px;display:flex;gap:16px;">
+        <a href="https://github.com" style="color:var(--muted);text-decoration:none;font-size:20px;" title="GitHub">⌥</a>
+        <a href="https://twitter.com" style="color:var(--muted);text-decoration:none;font-size:20px;" title="Twitter">✦</a>
+        <a href="https://discord.com" style="color:var(--muted);text-decoration:none;font-size:20px;" title="Discord">◈</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h5>Product</h5>
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#demo">Demo</a>
+      <a href="/changelog">Changelog</a>
+      <a href="/roadmap">Roadmap</a>
+    </div>
+    <div class="footer-col">
+      <h5>Developers</h5>
+      <a href="/docs">Documentation</a>
+      <a href="/docs/api">API Reference</a>
+      <a href="/docs/sdk">Python SDK</a>
+      <a href="/docs/webhooks">Webhooks</a>
+      <a href="/status">Status</a>
+    </div>
+    <div class="footer-col">
+      <h5>Company</h5>
+      <a href="/about">About</a>
+      <a href="/blog">Blog</a>
+      <a href="/careers">Careers</a>
+      <a href="/security">Security</a>
+      <a href="mailto:odjojitehilla@gmail.com">Contact</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 Velophos. All rights reserved.</span>
+    <span>Port Harcourt, Nigeria 🇳🇬</span>
+    <div style="display:flex;gap:24px;">
+      <a href="/privacy" style="color:var(--muted);text-decoration:none;">Privacy</a>
+      <a href="/terms" style="color:var(--muted);text-decoration:none;">Terms</a>
+      <a href="/cookies" style="color:var(--muted);text-decoration:none;">Cookies</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ─── CURSOR ─── */
+const cursor=document.getElementById('cursor');
+const cursorRing=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cursor.style.left=mx+'px';cursor.style.top=my+'px';
+});
+(function animRing(){
+  rx+=(mx-rx)*.12;ry+=(my-ry)*.12;
+  cursorRing.style.left=rx+'px';cursorRing.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+})();
+
+/* ─── SCROLL REVEALS ─── */
+const revealEls=document.querySelectorAll('.reveal');
+const revealObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');revealObs.unobserve(e.target);}});
+},{threshold:0.12});
+revealEls.forEach(el=>revealObs.observe(el));
+
+/* ─── LIQUID GLASS MOUSE HIGHLIGHT ─── */
+document.querySelectorAll('.glass-card').forEach(card=>{
+  const hl=card.querySelector('.liquid-highlight');
+  if(!hl)return;
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    hl.style.left=(e.clientX-r.left)+'px';
+    hl.style.top=(e.clientY-r.top)+'px';
+  });
+});
+
+/* ─── SLIDER ─── */
+let currentSlide=0;const totalSlides=4;
+const sliderTrack=document.getElementById('sliderTrack');
+const dots=document.querySelectorAll('.slider-dot');
+function goToSlide(n){
+  currentSlide=(n+totalSlides)%totalSlides;
+  sliderTrack.style.transform=`translateX(-${currentSlide*100}%)`;
+  dots.forEach((d,i)=>d.classList.toggle('active',i===currentSlide));
+}
+document.getElementById('nextSlide').addEventListener('click',()=>goToSlide(currentSlide+1));
+document.getElementById('prevSlide').addEventListener('click',()=>goToSlide(currentSlide-1));
+dots.forEach((d,i)=>d.addEventListener('click',()=>goToSlide(i)));
+setInterval(()=>goToSlide(currentSlide+1),5000);
+
+/* ─── FLYING JET ─── */
+const jet=document.getElementById('jet');
+const jetModal=document.getElementById('jetModal');
+const jetBase=document.getElementById('jetBase');
+
+if(jet && window.innerWidth>768){
+  let jetX=window.innerWidth*0.6;
+  let jetY=200;
+  let jetAngle=-8;
+  let velX=1.4;
+  let velY=0.3;
+  let scrollProgress=0;
+  let isLanded=false;
+  let showingModal=false;
+  let modalTimer=null;
+  let orbitPhase=0;
+  let orbitAmplitude=60;
+  let landingMode=false;
+  let landingStartY=0;
+  let landingTargetY=0;
+  let landingTargetX=0;
+
+  const W=()=>window.innerWidth;
+  const H=()=>window.innerHeight;
+
+  window.addEventListener('scroll',()=>{
+    scrollProgress=window.scrollY/(document.body.scrollHeight-window.innerHeight);
+    const footerRect=document.getElementById('footer').getBoundingClientRect();
+    if(footerRect.top<H()*0.6 && !landingMode){
+      landingMode=true;
+      landingStartY=jetY;
+      const baseRect=jetBase.getBoundingClientRect();
+      landingTargetX=baseRect.left+baseRect.width/2-90;
+      landingTargetY=baseRect.top-30;
+    }
+    if(footerRect.top>H()*0.8 && landingMode){
+      landingMode=false;isLanded=false;
+    }
+  });
+
+  let lastJetInteract=0;
+  function animateJet(){
+    if(isLanded){requestAnimationFrame(animateJet);return;}
+
+    if(landingMode){
+      const dx=landingTargetX-jetX;
+      const dy=landingTargetY-jetY;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<8){
+        isLanded=true;
+        jet.style.transform=`translate(${jetX}px,${jetY}px) rotate(0deg) scaleX(-1)`;
+        if(!showingModal){showJetModal();}
+        requestAnimationFrame(animateJet);return;
+      }
+      jetX+=dx*0.04;
+      jetY+=dy*0.04;
+      jetAngle=Math.atan2(dy,dx)*(180/Math.PI);
+    } else {
+      orbitPhase+=0.008;
+      const sp=scrollProgress;
+      const baseY= 150+sp*(H()-300);
+      const amp = orbitAmplitude*(1-sp*0.5);
+      const waveY=Math.sin(orbitPhase)*amp;
+      const waveX=Math.cos(orbitPhase*0.6)*amp*0.5;
+
+      const targetX= sp<0.3? W()*0.65+waveX
+                   : sp<0.6? W()*0.5+waveX*1.5
+                   : W()*0.35+waveX;
+      const targetY=baseY+waveY;
+
+      jetX+=(targetX-jetX)*0.022;
+      jetY+=(targetY-jetY)*0.022;
+
+      const dx2=targetX-jetX,dy2=targetY-jetY;
+      jetAngle=Math.atan2(dy2,dx2)*(180/Math.PI)*0.4;
+
+      /* bounce off walls */
+      if(jetX<80){velX=Math.abs(velX);}
+      if(jetX>W()-220){velX=-Math.abs(velX);}
+
+      /* random modal pop */
+      const now=Date.now();
+      if(now-lastJetInteract>12000&&!showingModal&&Math.random()<0.005){
+        showJetModal();lastJetInteract=now;
+      }
+    }
+
+    const flipX=velX<0||jetAngle>90||jetAngle<-90;
+    jet.style.transform=`translate(${jetX}px,${jetY}px) rotate(${jetAngle}deg) scaleX(${flipX?-1:1})`;
+    jet.style.left='0';jet.style.top='0';
+
+    if(showingModal){
+      jetModal.style.left=(jetX+190)+'px';
+      jetModal.style.top=(jetY-10)+'px';
+    }
+    requestAnimationFrame(animateJet);
+  }
+  animateJet();
+
+  function showJetModal(){
+    showingModal=true;
+    jetModal.style.left=(jetX+190)+'px';
+    jetModal.style.top=(jetY-10)+'px';
+    jetModal.classList.add('visible');
+    clearTimeout(modalTimer);
+    modalTimer=setTimeout(hideJetModal, isLanded?999999:6000);
+  }
+  function hideJetModal(){
+    showingModal=false;
+    jetModal.classList.remove('visible');
+  }
+  jet.style.cursor='pointer';
+  jet.style.pointerEvents='all';
+  jet.addEventListener('click',()=>{
+    showingModal?hideJetModal():showJetModal();
+    lastJetInteract=Date.now();
+  });
+  jetModal.addEventListener('mouseleave',()=>{if(!isLanded)hideJetModal();});
+
+  /* First modal pop after 3.5s */
+  setTimeout(()=>{showJetModal();lastJetInteract=Date.now();},3500);
+}
+
+/* ─── NAV scroll effect ─── */
+window.addEventListener('scroll',()=>{
+  const nav=document.querySelector('nav');
+  if(window.scrollY>60){
+    nav.style.background='rgba(2,4,8,0.92)';
+    nav.style.borderBottomColor='rgba(0,229,255,0.12)';
+  } else {
+    nav.style.background='rgba(2,4,8,0.6)';
+    nav.style.borderBottomColor='var(--glass-border)';
+  }
+});
+
+/* ─── PARALLAX ORBS ─── */
+window.addEventListener('scroll',()=>{
+  const sy=window.scrollY;
+  document.querySelector('.orb1').style.transform=`translate(0,${sy*.08}px) scale(1)`;
+  document.querySelector('.orb2').style.transform=`translate(0,${-sy*.06}px) scale(1)`;
+});
+</script>
+</body>
+</html>
