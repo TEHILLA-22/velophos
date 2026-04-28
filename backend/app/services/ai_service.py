@@ -1,25 +1,83 @@
 from app.core.config import OLLAMA_URL, MODEL
 from app.services.memory import retrieve_memory
 from app.services.short_memory import get_history
+from app.services.code_executor import execute_code
+from app.services.live_data import fetch_wikipedia
 import requests
 
-def generate_response(user_id: str, prompt: str):
-    # 🔹 Long-term memory
-    memories = retrieve_memory(user_id, prompt, n_results=2)
+def is_code_execution(prompt: str) -> bool:
+    trigger_words = ["run code", "execute", "calculate", "debug", "python:"]
+    return any(word in prompt.lower() for word in trigger_words)
 
-    # 🔹 Short-term memory
-    history = get_history(user_id)
+# 🔹 Simple lightweight intent detection (no extra model call)
+def is_realtime_query(prompt: str) -> bool:
+    prompt = prompt.lower()
+    keywords = [
+        "current", "latest", "today", "now",
+        "president", "price", "news", "2026"
+    ]
+    return any(k in prompt for k in keywords)
 
-    # Format short-term history
+
+def is_coding_query(prompt: str) -> bool:
+    prompt = prompt.lower()
+    keywords = [
+        "code", "function", "bug", "error",
+        "python", "javascript", "api", "sql"
+    ]
+    return any(k in prompt for k in keywords)
+
+
+def generate_response(chat_id: str, prompt: str):
+
+    if is_code_execution(prompt):
+
+        # extract code (simple version)
+        if "```" in prompt:
+            code = prompt.split("```")[1]
+        else:
+            code = prompt
+
+        result = execute_code(code)
+
+        return f"Result:\n{result}"
+
+    # 🔹 Long-term memory (vector DB)
+    memories = retrieve_memory(chat_id, prompt, n_results=2)
+
+    # 🔹 Short-term memory (recent chat)
+    history = get_history(chat_id)
+
+    # Format history
     history_text = "\n".join(
         [f"{msg['role']}: {msg['message']}" for msg in history]
     )
 
-    # Format long-term memory
+    # Format memory
     memory_text = "\n".join(memories)
 
+    # 🔹 Live data (only when needed)
+    live_context = ""
+    if is_realtime_query(prompt):
+        live_context = fetch_wikipedia("President_of_the_United_States")
+
+    # 🔹 Prompt specialization
+    if is_coding_query(prompt):
+        system_role = """
+You are a senior software engineer.
+
+Rules:
+- Be precise
+- Write clean, correct code
+- Use best practices
+- Explain briefly
+"""
+    else:
+        system_role = "You are Velophos, an intelligent assistant."
+
+    # 🔹 Final prompt
     full_prompt = f"""
-You are Velophos.
+{system_role}
 
 Recent conversation:
 {history_text}
@@ -27,8 +85,12 @@ Recent conversation:
 Relevant memory:
 {memory_text}
 
+Live context:
+{live_context}
+
 User: {prompt}
-Answer briefly:
+
+Answer:
 """
 
     response = requests.post(
@@ -38,8 +100,8 @@ Answer briefly:
             "prompt": full_prompt,
             "stream": False,
             "options": {
-                "num_predict": 150,
-                "temperature": 0.7
+                "num_predict": 200,
+                "temperature": 0.6
             }
         }
     )

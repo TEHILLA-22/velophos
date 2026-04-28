@@ -6,12 +6,12 @@ MAX_HISTORY = 6
 user_histories = defaultdict(lambda: deque(maxlen=MAX_HISTORY))
 
 
-def add_message(user_id: str, role: str, message: str):
-    user_histories[user_id].append({
+def add_message(chat_id: str, role: str, message: str):
+    user_histories[chat_id].append({
         "role": role,
         "message": message
     })
 
 
-def get_history(user_id: str):
-    return list(user_histories[user_id])
+def get_history(chat_id: str):
+    return list(user_histories[chat_id])

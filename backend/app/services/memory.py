@@ -24,14 +24,14 @@ def store_message(chat_id: str, role: str, content: str):
     finally:
         db.close()
 
-def retrieve_memory(user_id: str, query: str, n_results: int = 4):
+def retrieve_memory(chat_id: str, query: str, n_results: int = 4):
     col = get_collection()
     embedding = get_embedding(query)
 
     results = col.query(
         query_embeddings=[embedding],
         n_results=n_results,
-        where={"user_id": user_id}
+        where={"chat_id": chat_id}
     )
 
     return results.get("documents", [[]])[0]
