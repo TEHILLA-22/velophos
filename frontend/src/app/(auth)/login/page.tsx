@@ -2,7 +2,10 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
+import { GoogleLogin } from '@react-oauth/google'
+import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'sonner'
+import { LogIn, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -10,12 +13,10 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
 
   const handleLogin = async (e?: React.FormEvent) => {
     e?.preventDefault()
     setLoading(true)
-    setError('')
 
     try {
       const res = await fetch('http://localhost:8000/auth/login', {
@@ -27,233 +28,156 @@ export default function LoginPage() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.detail || 'Login failed')
+        toast.error(data.detail || 'Login failed')
         setLoading(false)
         return
       }
 
-      // store JWT
       localStorage.setItem('token', data.access_token)
-
-      // go to dashboard
+      toast.success('Welcome back to Velophos!')
       router.push('/dashboard')
 
     } catch (err) {
-      setError('Network error')
+      toast.error('Network error. Is the backend running?')
       setLoading(false)
     }
   }
 
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    try {
+      const res = await fetch('http://localhost:8000/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: credentialResponse.credential
+        })
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        localStorage.setItem('token', data.access_token)
+        toast.success(`Welcome, ${data.user.first_name}!`)
+        router.push('/dashboard')
+      } else {
+        toast.error(data.detail || 'Google login failed')
+      }
+    } catch (err) {
+      toast.error('Google authentication failed')
+    }
+  }
+
   const containerVariants = {
-    hidden: { opacity: 0, y: 30 },
+    hidden: { opacity: 0, y: 20 },
     visible: { 
       opacity: 1, 
       y: 0, 
-      transition: { duration: 0.6, ease: "easeOut", staggerChildren: 0.1 } 
+      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1], staggerChildren: 0.1 } 
     }
   }
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 15 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } }
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
   }
 
   return (
-    <main style={{
-      minHeight: '100vh', 
-      background: '#050505',
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center',
-      padding: '24px',
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
-      {/* Dynamic Background Glow */}
-      <motion.div 
-        animate={{ 
-          scale: [1, 1.05, 1],
-          opacity: [0.3, 0.5, 0.3] 
-        }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        style={{
-          position: 'absolute',
-          width: '700px', height: '700px',
-          background: 'radial-gradient(circle, rgba(99,102,241,0.15), transparent 70%)',
-          top: '-20%', right: '-10%',
-          filter: 'blur(80px)',
-          zIndex: 0
-        }} 
-      />
+    <main className="min-h-screen bg-[#020202] flex items-center justify-center p-6 relative overflow-hidden font-sans">
+      {/* Background Orbs */}
+      <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
 
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        style={{ width: '100%', maxWidth: '420px', zIndex: 1 }}
+        className="w-full max-w-[420px] z-10"
       >
-        <motion.div variants={itemVariants}>
-          <Link href="/" style={{
-            fontFamily: 'var(--font-display)', fontSize: '24px',
-            letterSpacing: '4px', color: '#fff', textDecoration: 'none',
-            display: 'block', textAlign: 'center', marginBottom: '56px',
-            fontWeight: 300
-          }}>VELOPHOS</Link>
+        <motion.div variants={itemVariants} className="text-center mb-12">
+          <Link href="/" className="inline-block">
+            <span className="text-2xl font-light tracking-[0.3em] text-white/90 font-display">VELOPHOS</span>
+          </Link>
         </motion.div>
 
         <motion.div
           variants={itemVariants}
-          style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: '28px', 
-            padding: '48px 40px',
-            backdropFilter: 'blur(20px)',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
-          }}
+          className="bg-white/[0.02] border border-white/[0.06] rounded-[32px] p-10 backdrop-blur-2xl shadow-2xl relative overflow-hidden"
         >
-          <motion.div variants={itemVariants}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', letterSpacing: '1px', marginBottom: '8px', color: '#fff', fontWeight: 500 }}>
-              Welcome back
-            </h1>
-            <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.5)', marginBottom: '36px' }}>
-              Enter your details to sign in
-            </p>
-          </motion.div>
+          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          
+          <div className="mb-10">
+            <h1 className="text-3xl font-medium tracking-tight text-white mb-2">Welcome Back</h1>
+            <p className="text-white/40 text-[15px]">Experience the next evolution of AI.</p>
+          </div>
 
-          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <motion.div variants={itemVariants}>
-              <input
-                type="email" placeholder="Email address" value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                style={{
-                  width: '100%',
-                  padding: '16px 20px', borderRadius: '14px',
-                  background: 'rgba(0,0,0,0.2)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  color: '#fff', fontSize: '15px',
-                  outline: 'none', fontFamily: 'var(--font-body)',
-                  transition: 'border-color 0.2s ease, background 0.2s ease'
-                }}
-                onFocus={e => {
-                  e.currentTarget.style.borderColor = 'rgba(99,102,241,0.5)';
-                  e.currentTarget.style.background = 'rgba(0,0,0,0.4)';
-                }}
-                onBlur={e => {
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-                  e.currentTarget.style.background = 'rgba(0,0,0,0.2)';
-                }}
-              />
-            </motion.div>
-            
-            <motion.div variants={itemVariants}>
-              <input
-                type="password" placeholder="Password" value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-                style={{
-                  width: '100%',
-                  padding: '16px 20px', borderRadius: '14px',
-                  background: 'rgba(0,0,0,0.2)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  color: '#fff', fontSize: '15px',
-                  outline: 'none', fontFamily: 'var(--font-body)',
-                  transition: 'border-color 0.2s ease, background 0.2s ease'
-                }}
-                onFocus={e => {
-                  e.currentTarget.style.borderColor = 'rgba(99,102,241,0.5)';
-                  e.currentTarget.style.background = 'rgba(0,0,0,0.4)';
-                }}
-                onBlur={e => {
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-                  e.currentTarget.style.background = 'rgba(0,0,0,0.2)';
-                }}
-              />
-            </motion.div>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-4">
+              <div className="relative group">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-indigo-400 transition-colors" />
+                <input
+                  type="email"
+                  placeholder="Email Address"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl py-4 pl-12 pr-4 text-white text-[15px] outline-none focus:border-indigo-500/50 focus:bg-white/[0.06] transition-all placeholder:text-white/20"
+                />
+              </div>
 
-            {error && (
-              <motion.p 
-                initial={{ opacity: 0, height: 0 }} 
-                animate={{ opacity: 1, height: 'auto' }} 
-                style={{ color: '#ef4444', fontSize: '14px', margin: '4px 0 0 4px' }}
-              >
-                {error}
-              </motion.p>
-            )}
+              <div className="relative group">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-indigo-400 transition-colors" />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl py-4 pl-12 pr-4 text-white text-[15px] outline-none focus:border-indigo-500/50 focus:bg-white/[0.06] transition-all placeholder:text-white/20"
+                />
+              </div>
+            </div>
 
-            <motion.div variants={itemVariants} style={{ marginTop: '12px' }}>
-              <motion.button
-                type="submit"
-                disabled={loading}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                style={{
-                  width: '100%', padding: '16px',
-                  borderRadius: '14px', background: '#fff',
-                  color: '#000', fontSize: '15px', fontWeight: 600,
-                  border: 'none', cursor: 'pointer',
-                  opacity: loading ? 0.7 : 1,
-                  display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px',
-                  transition: 'box-shadow 0.2s ease'
-                }}
-              >
-                {loading && (
-                  <div style={{
-                    width: '18px', height: '18px',
-                    border: '2px solid rgba(0,0,0,0.2)',
-                    borderTop: '2px solid #000',
-                    borderRadius: '50%',
-                    animation: 'spin 0.6s linear infinite'
-                  }} />
-                )}
-                {loading ? 'Signing in...' : 'Sign In'}
-              </motion.button>
-            </motion.div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full mt-6 bg-white text-black h-[56px] rounded-2xl font-semibold text-[15px] flex items-center justify-center gap-2 hover:bg-white/90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none"
+            >
+              {loading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  Sign In
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
           </form>
 
-          <motion.div variants={itemVariants} style={{ display: 'flex', alignItems: 'center', margin: '32px 0', opacity: 0.5 }}>
-            <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to right, transparent, #fff)' }} />
-            <span style={{ padding: '0 16px', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>or</span>
-            <div style={{ flex: 1, height: '1px', background: 'linear-gradient(to left, transparent, #fff)' }} />
-          </motion.div>
+          <div className="flex items-center my-8 gap-4">
+            <div className="flex-1 h-[1px] bg-white/[0.06]" />
+            <span className="text-[11px] uppercase tracking-widest text-white/20 font-bold">Or continue with</span>
+            <div className="flex-1 h-[1px] bg-white/[0.06]" />
+          </div>
 
-          <motion.div variants={itemVariants}>
-            <motion.button
-              type="button"
-              whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.08)' }}
-              whileTap={{ scale: 0.98 }}
-              style={{
-                width: '100%', padding: '16px',
-                borderRadius: '14px', background: 'rgba(255,255,255,0.04)',
-                color: '#fff', fontSize: '15px', fontWeight: 500,
-                border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer',
-                display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px',
-                transition: 'background 0.2s ease'
-              }}
-              onClick={() => alert("OAuth will be implemented soon!")}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M22.56 12.25C22.56 11.47 22.49 10.72 22.36 10H12V14.26H17.92C17.67 15.63 16.89 16.81 15.72 17.59V20.34H19.28C21.36 18.42 22.56 15.6 22.56 12.25Z" fill="#4285F4"/>
-                <path d="M12 23C14.97 23 17.46 22.02 19.28 20.34L15.72 17.59C14.74 18.25 13.48 18.66 12 18.66C9.13 18.66 6.7 16.72 5.83 14.12H2.17V16.96C3.98 20.56 7.7 23 12 23Z" fill="#34A853"/>
-                <path d="M5.83 14.12C5.61 13.46 5.48 12.75 5.48 12C5.48 11.25 5.61 10.54 5.83 9.88V7.04H2.17C1.43 8.52 1 10.2 1 12C1 13.8 1.43 15.48 2.17 16.96L5.83 14.12Z" fill="#FBBC05"/>
-                <path d="M12 5.34C13.62 5.34 15.06 5.9 16.2 6.99L19.35 3.84C17.46 2.08 14.97 1 12 1C7.7 1 3.98 3.44 2.17 7.04L5.83 9.88C6.7 7.28 9.13 5.34 12 5.34Z" fill="#EA4335"/>
-              </svg>
-              Continue with Google
-            </motion.button>
-          </motion.div>
+          <div className="flex justify-center">
+             <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => toast.error('Google Login Failed')}
+                theme="dark"
+                shape="pill"
+                size="large"
+                width="100%"
+              />
+          </div>
 
-          <motion.p variants={itemVariants} style={{ textAlign: 'center', marginTop: '36px', fontSize: '14px', color: 'rgba(255,255,255,0.4)' }}>
-            Don't have an account?{' '}
-            <Link href="/signup" style={{ color: '#fff', textDecoration: 'none', fontWeight: 500, transition: 'color 0.2s' }}>
-              Sign up
+          <p className="text-center mt-10 text-[14px] text-white/30">
+            New to Velophos?{' '}
+            <Link href="/signup" className="text-white hover:text-indigo-400 font-medium transition-colors">
+              Create an account
             </Link>
-          </motion.p>
+          </p>
         </motion.div>
       </motion.div>
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-      `}</style>
     </main>
   )
 }

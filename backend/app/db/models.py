@@ -8,8 +8,8 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     
-    email = Column(String, unique=True, index=True)
-    password = Column(String, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=False)
+    password = Column(String, nullable=True)
 
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
@@ -17,6 +17,8 @@ class User(Base):
     is_verified = Column(Boolean, default=False)
 
     otp_code = Column(String, nullable=True)
+
+    provider = Column(String, default="email")
 
     chats = relationship("Chat", back_populates="user")
 
