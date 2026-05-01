@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-from app.services.ai_service import generate_response
+from app.services.ai_service import generate_response, generate_chat_title
 from app.services.memory import store_message
 from app.services.short_memory import add_message
 from app.core.deps import get_current_user, get_current_user_obj
@@ -9,7 +9,7 @@ from app.services.chat_service import create_chat
 from app.db.database import get_db
 from sqlalchemy.orm import Session
 from app.db import models
-from app.db.models import Usage, Subscription, User
+from app.db.models import Usage, Subscription, User, Chat
 from datetime import datetime, timedelta
 from app.core.plans import PLANS
 import requests
@@ -63,18 +63,43 @@ def chat(req: ChatRequest, user: User = Depends(get_current_user_obj), db: Sessi
     # 🔹 generate response
     reply = generate_response(str(chat_id), req.message)
 
+    chat = db.query(Chat).filter(Chat.id == chat_id).first()
+
+    # 🔥 only name if it has no title or the default title
+    if chat and (not chat.title or chat.title == "New Chat"):
+        title = generate_chat_title(req.message)
+        chat.title = title
+        db.add(chat)
+        db.commit() 
+
     # 🔹 store AI reply
     store_message(str(chat_id), "ai", reply)
 
     return {
         "response": reply,
-        "chat_id": chat_id
+        "chat_id": chat_id,
+        "chat_title": chat.title if chat else None
     }
 
 @router.get("/chats")
 def get_chats(user_id: int = Depends(get_current_user), db: Session = Depends(get_db)):
     chats = db.query(models.Chat).filter(models.Chat.user_id == user_id).all()
     return [{"id": str(c.id), "title": c.title} for c in chats]
+
+
+@router.get("/chats/search")
+def search_chats(q: str, user_id: int = Depends(get_current_user), db=Depends(get_db)):
+
+    chats = db.query(Chat).filter(
+        Chat.user_id == user_id,
+        Chat.title.ilike(f"%{q}%")
+    ).all()
+
+    return [
+        {"id": c.id, "title": c.title}
+        for c in chats
+    ]
+
 
 @router.get("/chat/{chat_id}")
 def get_chat_history(chat_id: int, user_id: int = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -84,3 +109,17 @@ def get_chat_history(chat_id: int, user_id: int = Depends(get_current_user), db:
     
     messages = db.query(models.Message).filter(models.Message.chat_id == chat_id).order_by(models.Message.timestamp.asc()).all()
     return [{"role": m.role, "content": m.content} for m in messages]
+
+
+@router.delete("/chat/{chat_id}")
+def delete_chat(chat_id: int, user_id: int = Depends(get_current_user), db: Session = Depends(get_db)):
+    chat = db.query(models.Chat).filter(models.Chat.id == chat_id, models.Chat.user_id == user_id).first()
+    if not chat:
+        raise HTTPException(status_code=404, detail="Chat not found")
+    
+    # SQLAlchemy will handle cascading deletes if configured, but we can do it explicitly to be safe
+    db.query(models.Message).filter(models.Message.chat_id == chat_id).delete()
+    db.delete(chat)
+    db.commit()
+    
+    return {"status": "success", "message": "Chat deleted"}

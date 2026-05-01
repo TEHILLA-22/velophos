@@ -2,6 +2,7 @@ export async function apiFetch(url: string, options: any = {}) {
   const token = localStorage.getItem('token')
 
   return fetch(`http://localhost:8000${url}`, {
+    credentials: 'include',
     ...options,
     headers: {
       'Content-Type': 'application/json',

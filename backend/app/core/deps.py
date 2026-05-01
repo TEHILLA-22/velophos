@@ -9,7 +9,7 @@ from app.db.database import get_db
 from app.db.models import User
 
 
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 
 
 from fastapi import Request

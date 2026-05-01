@@ -123,7 +123,7 @@ def google_auth(req: GoogleAuthRequest, response: Response, db: Session = Depend
         httponly=True,
         secure=False,  # ⚠️ set True in production (HTTPS)
         samesite="lax",
-        max_age=60 * 60 * 24 * 7  # 7 days
+        max_age=60 * 60 * 24 * 30  # 30 days
     )
 
     return {
@@ -230,7 +230,7 @@ def login(req: LoginRequest, response: Response, db: Session = Depends(get_db)):
         httponly=True,
         secure=False,  # ⚠️ set True in production (HTTPS)
         samesite="lax",
-        max_age=60 * 60 * 24 * 7  # 7 days
+        max_age=60 * 60 * 24 * 30  # 30 days
     )
 
     return {

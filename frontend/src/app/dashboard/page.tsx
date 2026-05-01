@@ -31,6 +31,7 @@ export default function Dashboard() {
   
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
+  const [updateTrigger, setUpdateTrigger] = useState(0)
 
   // File states
   const [fileContent, setFileContent] = useState<string | null>(null)
@@ -157,6 +158,11 @@ export default function Dashboard() {
 
       setChatId(data.chat_id.toString())
 
+      // Force sidebar refresh if a title was generated
+      if (data.chat_title) {
+        setUpdateTrigger(prev => prev + 1)
+      }
+
       setMessages(prev => [
         ...prev,
         { role: 'ai', content: cleanResponse(data.response || 'No response') }
@@ -191,6 +197,7 @@ export default function Dashboard() {
         activeChat={chatId}
         isOpen={sidebarOpen}
         isMobile={isMobile}
+        updateTrigger={updateTrigger}
         toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         onSelect={async (id) => {
           setChatId(id || null)
@@ -200,9 +207,7 @@ export default function Dashboard() {
           }
 
           const token = localStorage.getItem('token')
-          const res = await fetch(`http://localhost:8000/api/chat/${id}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          })
+          const res = await apiFetch(`/api/chat/${id}`)
           if (res.ok) {
             const data = await res.json()
             setMessages(data.map((m: any) => ({

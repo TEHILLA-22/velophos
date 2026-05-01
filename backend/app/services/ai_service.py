@@ -28,6 +28,11 @@ def is_coding_query(prompt: str) -> bool:
     return any(k in prompt for k in keywords)
 
 
+def generate_chat_title(message: str):
+    return " ".join(message.split()[:5])
+
+
+
 def generate_response(chat_id: str, prompt: str):
 
     if is_code_execution(prompt):
