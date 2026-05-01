@@ -12,14 +12,30 @@ from app.db.models import User
 security = HTTPBearer()
 
 
-def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+from fastapi import Request
+
+def get_current_user(
+    request: Request,
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    token = None
+
+    # 🔹 1. Try cookie first
+    if "access_token" in request.cookies:
+        token = request.cookies.get("access_token")
+
+    # 🔹 2. fallback to header (for API tools, testing)
+    elif credentials:
+        token = credentials.credentials
+
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
     try:
-        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload["user_id"]
     except:
         raise HTTPException(status_code=401, detail="Invalid token")
-
-
 
 
 def get_current_user_obj(

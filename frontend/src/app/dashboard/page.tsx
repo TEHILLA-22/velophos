@@ -108,6 +108,7 @@ export default function Dashboard() {
     try {
       const res = await fetch('http://localhost:8000/api/chat', {
         method: 'POST',
+        credentials: "include",
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
