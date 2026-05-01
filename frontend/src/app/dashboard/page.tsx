@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Sidebar from './Sidebar'
+import { apiFetch } from '@/lib/api'
 import { Plus, Send, Paperclip, Loader2, LogOut, Menu, FileText, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -11,8 +12,17 @@ type Msg = {
   content: string
 }
 
+type User = {
+  id: number
+  email: string
+  first_name: string
+  last_name: string
+}
+
 export default function Dashboard() {
   const router = useRouter()
+
+  const [user, setUser] = useState<User | null>(null)
 
   const [messages, setMessages] = useState<Msg[]>([])
   const [input, setInput] = useState('')
@@ -88,6 +98,24 @@ export default function Dashboard() {
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
+
+
+  useEffect(() => {
+  const loadUser = async () => {
+    const res = await apiFetch('/auth/me')
+
+    if (res.status === 401) {
+      router.push('/login')
+      return
+    }
+
+    const data = await res.json()
+    setUser(data)
+  }
+
+  loadUser()
+  }, [])
+
 
   const sendMessage = async () => {
     if (!input.trim() && !fileContent) return

@@ -7,6 +7,12 @@ type Chat = {
   title?: string
 }
 
+type User = {
+  first_name: string
+  last_name: string
+  plan: string
+}
+
 export default function Sidebar({
   onSelect,
   activeChat,
@@ -21,12 +27,12 @@ export default function Sidebar({
   isMobile: boolean
 }) {
   const [chats, setChats] = useState<Chat[]>([])
+  const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
     const fetchChats = async () => {
       const token = localStorage.getItem('token')
       if (!token) return
-
       try {
         const res = await fetch('http://localhost:8000/api/chats', {
           headers: { Authorization: `Bearer ${token}` }
@@ -40,8 +46,23 @@ export default function Sidebar({
       }
     }
 
+    const fetchUser = async () => {
+      const token = localStorage.getItem('token')
+      if (!token) return
+      try {
+        const res = await fetch('http://localhost:8000/auth/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        const data = await res.json()
+        if (data.id) setUser(data)
+      } catch (e) {
+        console.error(e)
+      }
+    }
+
     fetchChats()
-  }, [activeChat]) // Refresh when a new chat becomes active
+    fetchUser()
+  }, [activeChat])
 
   return (
     <>
@@ -155,6 +176,44 @@ export default function Sidebar({
                 {chat.title || 'New Chat'}
               </div>
             ))}
+          </div>
+          {/* ── User Section ── */}
+          <div style={{
+            marginTop: 'auto',
+            paddingTop: '24px',
+            borderTop: '1px solid rgba(255,255,255,0.08)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                width: '36px', height: '36px',
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '14px', fontWeight: 600, color: '#fff'
+              }}>
+                {user?.first_name?.[0]}{user?.last_name?.[0]}
+              </div>
+              <div style={{ flex: 1, overflow: 'hidden' }}>
+                <p style={{ fontSize: '14px', fontWeight: 500, color: '#fff', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {user?.first_name} {user?.last_name}
+                </p>
+                {user?.plan === 'pro' ? (
+                  <span style={{ fontSize: '11px', color: '#6366f1', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    PRO PLAN
+                  </span>
+                ) : (
+                  <a href="/pricing" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', textDecoration: 'none', transition: 'color 0.2s' }}
+                    onMouseEnter={e => e.currentTarget.style.color = '#fff'}
+                    onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}
+                  >
+                    Upgrade to Pro
+                  </a>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </motion.div>

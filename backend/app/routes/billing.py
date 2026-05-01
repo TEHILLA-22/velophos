@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 # 🔹 Initialize payment
-@router.post("/billing/initialize")
+@router.post("/initialize")
 def initialize_payment(user: User = Depends(get_current_user_obj)):
 
     if not user.email:
@@ -41,7 +41,7 @@ def initialize_payment(user: User = Depends(get_current_user_obj)):
 
 
 # 🔹 Verify payment
-@router.get("/billing/verify/{reference}")
+@router.get("/verify/{reference}")
 def verify_payment(
     reference: str,
     db: Session = Depends(get_db),
@@ -85,7 +85,7 @@ def verify_payment(
 
 
 # 🔹 Webhook (IMPORTANT: should verify signature in production)
-@router.post("/billing/webhook")
+@router.post("/webhook")
 async def paystack_webhook(request: Request, db=Depends(get_db)):
 
     import hmac

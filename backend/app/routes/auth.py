@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.db import models
 from app.db.models import User
+from app.core.deps import get_current_user
 from app.core.security import hash_password, verify_password, create_access_token
 from app.core.otp import generate_otp
 from app.services.email_service import send_otp_email
@@ -185,6 +186,21 @@ def verify_otp(req: VerifyOTPRequest, db: Session = Depends(get_db)):
 
     return {"message": "Email verified successfully"}
 
+
+@router.get("/me")
+def get_me(user_id: int = Depends(get_current_user), db=Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {
+        "id": user.id,
+        "email": user.email,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "plan": user.plan
+    }
 
 
 @router.post("/login")

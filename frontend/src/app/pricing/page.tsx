@@ -20,7 +20,7 @@ export default function PricingPage() {
         return
       }
 
-      const res = await fetch('http://localhost:8000/billing/billing/initialize', {
+      const res = await fetch('http://localhost:8000/billing/initialize', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
