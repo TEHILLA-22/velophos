@@ -20,7 +20,38 @@ class User(Base):
 
     provider = Column(String, default="email")
 
+    plan = Column(String, default="free")   # free, pro
+    is_active = Column(Boolean, default=True)
+
     chats = relationship("Chat", back_populates="user")
+
+
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, index=True)
+
+    plan = Column(String)  # free, pro
+    status = Column(String)  # active, canceled, expired
+
+    provider = Column(String)  # paystack
+    reference = Column(String, unique=True)
+
+    started_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(DateTime, nullable=True)
+    
+
+class Usage(Base):
+    __tablename__ = "usage"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, index=True)
+
+    messages_used = Column(Integer, default=0)
+    tokens_used = Column(Integer, default=0)
+
+    last_reset = Column(DateTime, default=datetime.utcnow)        
 
 
 class Chat(Base):

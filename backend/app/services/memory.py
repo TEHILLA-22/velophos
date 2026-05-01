@@ -9,7 +9,11 @@ collection = None
 def get_collection():
     global client, collection
     if client is None:
-        client = chromadb.Client()
+        client = chromadb.Client(
+            chromadb.config.Settings(
+                persist_directory="./chroma_db"
+            )
+        )
         collection = client.get_or_create_collection(name="chat_memory")
     return collection
 

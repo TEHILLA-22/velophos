@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.db import models
@@ -36,7 +36,7 @@ class GoogleAuthRequest(BaseModel):
 # --- Endpoints ---
 
 @router.post("/google")
-def google_auth(req: GoogleAuthRequest, db: Session = Depends(get_db)):
+def google_auth(req: GoogleAuthRequest, response: Response, db: Session = Depends(get_db)):
     try:
         # 🔹 Verify the Google ID Token
         # Use httpx for verification as it proved more stable in tests
@@ -116,6 +116,15 @@ def google_auth(req: GoogleAuthRequest, db: Session = Depends(get_db)):
     # 🔐 Generate access token
     access_token = create_access_token({"user_id": user.id})
 
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=False,  # ⚠️ set True in production (HTTPS)
+        samesite="lax",
+        max_age=60 * 60 * 24 * 7  # 7 days
+    )
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
@@ -177,8 +186,9 @@ def verify_otp(req: VerifyOTPRequest, db: Session = Depends(get_db)):
     return {"message": "Email verified successfully"}
 
 
+
 @router.post("/login")
-def login(req: LoginRequest, db: Session = Depends(get_db)):
+def login(req: LoginRequest, response: Response, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == req.email).first()
 
     if not user:
@@ -197,6 +207,15 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=403, detail="Email not verified")
 
     access_token = create_access_token({"user_id": user.id})
+
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=False,  # ⚠️ set True in production (HTTPS)
+        samesite="lax",
+        max_age=60 * 60 * 24 * 7  # 7 days
+    )
 
     return {
         "access_token": access_token, 

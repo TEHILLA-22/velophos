@@ -4,11 +4,16 @@ from typing import Optional
 from app.services.ai_service import generate_response
 from app.services.memory import store_message
 from app.services.short_memory import add_message
-from app.core.deps import get_current_user
+from app.core.deps import get_current_user, get_current_user_obj
 from app.services.chat_service import create_chat
 from app.db.database import get_db
 from sqlalchemy.orm import Session
 from app.db import models
+from app.db.models import Usage, Subscription, User
+from datetime import datetime, timedelta
+from app.core.plans import PLANS
+import requests
+
 
 router = APIRouter()
 
@@ -16,12 +21,39 @@ class ChatRequest(BaseModel):
     message: str
     chat_id: Optional[int] = None
 
+
+
+def check_usage(user, db):
+    usage = db.query(Usage).filter(Usage.user_id == user.id).first()
+
+    if not usage:
+        usage = Usage(user_id=user.id)
+        db.add(usage)
+        db.commit()
+
+    # 🔄 reset daily
+    if datetime.utcnow() - usage.last_reset > timedelta(days=1):
+        usage.messages_used = 0
+        usage.last_reset = datetime.utcnow()
+        db.commit()
+
+    plan_limits = PLANS[user.plan]
+
+    if usage.messages_used >= plan_limits["messages_per_day"]:
+        raise HTTPException(status_code=403, detail="Limit reached")
+
+    # increment usage
+    usage.messages_used += 1
+    db.commit()
+
+
 @router.post("/chat")
-def chat(req: ChatRequest, user_id: int = Depends(get_current_user)):
+def chat(req: ChatRequest, user: User = Depends(get_current_user_obj), db: Session = Depends(get_db)):
+    check_usage(user, db)
 
     # 🔹 create or reuse chat
     if not req.chat_id:
-        chat_id = create_chat(user_id)
+        chat_id = create_chat(user.id)
     else:
         chat_id = req.chat_id
 

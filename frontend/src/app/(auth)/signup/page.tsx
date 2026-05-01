@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { GoogleLogin } from '@react-oauth/google'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { UserPlus, Mail, Lock, User, ArrowRight, Loader2 } from 'lucide-react'
 
@@ -41,8 +41,7 @@ export default function SignupPage() {
       }
 
       toast.success('Verification code sent to your email!')
-      
-      // redirect to OTP page (assuming it exists or will be styled)
+
       setTimeout(() => {
         router.push(`/otp?email=${encodeURIComponent(email)}`)
       }, 2000)
@@ -58,9 +57,7 @@ export default function SignupPage() {
       const res = await fetch('http://localhost:8000/auth/google', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token: credentialResponse.credential
-        })
+        body: JSON.stringify({ token: credentialResponse.credential })
       })
 
       const data = await res.json()
@@ -77,88 +74,188 @@ export default function SignupPage() {
     }
   }
 
-  const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1], staggerChildren: 0.1 } 
+  const pageVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.6, staggerChildren: 0.07 } }
+  }
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 44, scale: 0.97 },
+    visible: {
+      opacity: 1, y: 0, scale: 1,
+      transition: { duration: 1.05, ease: [0.16, 1, 0.3, 1] }
     }
   }
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+    hidden: { opacity: 0, y: 14 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] } }
   }
 
   return (
-    <main className="min-h-screen bg-[#020202] flex items-center justify-center p-6 relative overflow-hidden font-sans">
-      {/* Background Orbs */}
-      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
+    <main style={{
+      minHeight: '100vh',
+      background: '#000',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '24px',
+      position: 'relative',
+      overflow: 'hidden',
+      fontFamily: "'Outfit', sans-serif",
+    }}>
+
+      {/* ── Ambient background ── */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
+        {/* Top-left orb */}
+        <div style={{
+          position: 'absolute', top: '-15%', left: '-10%',
+          width: 580, height: 580, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%)',
+          filter: 'blur(60px)',
+        }} />
+        {/* Bottom-right orb */}
+        <div style={{
+          position: 'absolute', bottom: '-15%', right: '-10%',
+          width: 500, height: 500, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(99,102,241,0.065) 0%, transparent 70%)',
+          filter: 'blur(60px)',
+        }} />
+        {/* Center breath glow */}
+        <div style={{
+          position: 'absolute', top: '45%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 800, height: 280, borderRadius: '50%',
+          background: 'radial-gradient(ellipse, rgba(59,130,246,0.025) 0%, transparent 70%)',
+          filter: 'blur(40px)',
+        }} />
+        {/* Fine grid */}
+        <div style={{
+          position: 'absolute', inset: 0, opacity: 0.018,
+          backgroundImage: `
+            linear-gradient(rgba(255,255,255,1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)
+          `,
+          backgroundSize: '72px 72px',
+        }} />
+      </div>
 
       <motion.div
-        variants={containerVariants}
+        variants={pageVariants}
         initial="hidden"
         animate="visible"
-        className="w-full max-w-[440px] z-10"
+        style={{ width: '100%', maxWidth: 440, position: 'relative', zIndex: 1 }}
       >
-        <motion.div variants={itemVariants} className="text-center mb-12">
-          <Link href="/" className="inline-block">
-            <span className="text-2xl font-light tracking-[0.3em] text-white/90 font-display">VELOPHOS</span>
+
+        {/* ── Logo ── */}
+        <motion.div variants={itemVariants} style={{ textAlign: 'center', marginBottom: 40 }}>
+          <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
+            <span style={{
+              fontFamily: "'Bebas Neue', cursive",
+              fontSize: 27, letterSpacing: '0.35em',
+              color: 'rgba(255,255,255,0.9)',
+            }}>
+              VELOPHOS
+            </span>
           </Link>
         </motion.div>
 
+        {/* ── Card ── */}
         <motion.div
-          variants={itemVariants}
-          className="bg-white/[0.02] border border-white/[0.06] rounded-[32px] p-10 backdrop-blur-2xl shadow-2xl relative overflow-hidden"
+          variants={cardVariants}
+          style={{
+            background: 'rgba(255,255,255,0.025)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: 28,
+            padding: '42px 38px 38px',
+            backdropFilter: 'blur(32px)',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
         >
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-          
-          <div className="mb-10">
-            <h1 className="text-3xl font-medium tracking-tight text-white mb-2">Join Velophos</h1>
-            <p className="text-white/40 text-[15px]">Be part of what's coming next.</p>
-          </div>
+          {/* Top shine line */}
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 35%, rgba(59,130,246,0.22) 65%, transparent 100%)',
+          }} />
+          {/* Inner top-left accent glow */}
+          <div style={{
+            position: 'absolute', top: -60, left: -60, width: 200, height: 200,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(59,130,246,0.07) 0%, transparent 70%)',
+            pointerEvents: 'none',
+          }} />
+          {/* Inner bottom-right accent glow */}
+          <div style={{
+            position: 'absolute', bottom: -80, right: -80, width: 240, height: 240,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%)',
+            pointerEvents: 'none',
+          }} />
 
-          <form onSubmit={handleSignup} className="space-y-4">
-            <div className="flex gap-4">
-               <div className="relative group flex-1">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-indigo-400 transition-colors" />
+          {/* ── Heading ── */}
+          <motion.div variants={itemVariants} style={{ marginBottom: 32 }}>
+            <h1 style={{
+              fontSize: 25, fontWeight: 500, letterSpacing: '-0.3px',
+              color: '#fff', marginBottom: 7,
+            }}>
+              Create your account
+            </h1>
+            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)', lineHeight: 1.5 }}>
+              Be part of what's coming next.
+            </p>
+          </motion.div>
+
+          {/* ── Form ── */}
+          <motion.form
+            variants={itemVariants}
+            onSubmit={handleSignup}
+            style={{ display: 'flex', flexDirection: 'column', gap: 11 }}
+          >
+            {/* Name row */}
+            <div style={{ display: 'flex', gap: 10 }}>
+              <FieldWrap icon={<User size={14} />} style={{ flex: 1 }}>
                 <input
                   type="text"
-                  placeholder="First Name"
+                  placeholder="First name"
                   value={firstName}
                   onChange={e => setFirstName(e.target.value)}
                   required
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl py-4 pl-12 pr-4 text-white text-[15px] outline-none focus:border-indigo-500/50 focus:bg-white/[0.06] transition-all placeholder:text-white/20"
+                  style={{ ...inputStyle, paddingLeft: 42 }}
+                  onFocus={e => Object.assign(e.currentTarget.style, inputFocusStyle)}
+                  onBlur={e => Object.assign(e.currentTarget.style, inputBlurStyle)}
                 />
-              </div>
-              <div className="relative group flex-1">
+              </FieldWrap>
+              <div style={{ flex: 1, position: 'relative' }}>
                 <input
                   type="text"
-                  placeholder="Last Name"
+                  placeholder="Last name"
                   value={lastName}
                   onChange={e => setLastName(e.target.value)}
                   required
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl py-4 px-4 text-white text-[15px] outline-none focus:border-indigo-500/50 focus:bg-white/[0.06] transition-all placeholder:text-white/20"
+                  style={{ ...inputStyle, paddingLeft: 16 }}
+                  onFocus={e => Object.assign(e.currentTarget.style, inputFocusStyle)}
+                  onBlur={e => Object.assign(e.currentTarget.style, inputBlurStyle)}
                 />
               </div>
             </div>
 
-            <div className="relative group">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-indigo-400 transition-colors" />
+            {/* Email */}
+            <FieldWrap icon={<Mail size={14} />}>
               <input
                 type="email"
-                placeholder="Email Address"
+                placeholder="Email address"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl py-4 pl-12 pr-4 text-white text-[15px] outline-none focus:border-indigo-500/50 focus:bg-white/[0.06] transition-all placeholder:text-white/20"
+                style={inputStyle}
+                onFocus={e => Object.assign(e.currentTarget.style, inputFocusStyle)}
+                onBlur={e => Object.assign(e.currentTarget.style, inputBlurStyle)}
               />
-            </div>
+            </FieldWrap>
 
-            <div className="relative group">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20 group-focus-within:text-indigo-400 transition-colors" />
+            {/* Password */}
+            <FieldWrap icon={<Lock size={14} />}>
               <input
                 type="password"
                 placeholder="Password (min. 8 characters)"
@@ -166,51 +263,297 @@ export default function SignupPage() {
                 onChange={e => setPassword(e.target.value)}
                 required
                 minLength={8}
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-2xl py-4 pl-12 pr-4 text-white text-[15px] outline-none focus:border-indigo-500/50 focus:bg-white/[0.06] transition-all placeholder:text-white/20"
+                style={inputStyle}
+                onFocus={e => Object.assign(e.currentTarget.style, inputFocusStyle)}
+                onBlur={e => Object.assign(e.currentTarget.style, inputBlurStyle)}
               />
-            </div>
+            </FieldWrap>
 
-            <button
+            {/* Password strength bar */}
+            <PasswordStrength password={password} />
+
+            {/* Submit */}
+            <motion.button
               type="submit"
               disabled={loading}
-              className="w-full mt-6 bg-white text-black h-[56px] rounded-2xl font-semibold text-[15px] flex items-center justify-center gap-2 hover:bg-white/90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none"
+              whileTap={loading ? {} : { scale: 0.97 }}
+              style={{
+                marginTop: 6,
+                width: '100%', height: 52,
+                borderRadius: 14,
+                background: loading ? 'rgba(255,255,255,0.7)' : '#fff',
+                color: '#000',
+                fontSize: 14, fontWeight: 600,
+                letterSpacing: '0.2px',
+                border: 'none',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                pointerEvents: loading ? 'none' : 'all',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                transition: 'background 0.2s',
+                position: 'relative', overflow: 'hidden',
+                fontFamily: "'Outfit', sans-serif",
+              }}
+              onMouseEnter={e => { if (!loading) e.currentTarget.style.background = 'rgba(255,255,255,0.88)' }}
+              onMouseLeave={e => { if (!loading) e.currentTarget.style.background = '#fff' }}
             >
-              {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  Create Account
-                  <ArrowRight className="w-4 h-4" />
-                </>
+              {/* Shimmer sweep */}
+              {!loading && (
+                <span style={{
+                  position: 'absolute', inset: 0,
+                  background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.35) 50%, transparent 60%)',
+                  backgroundSize: '200% 100%',
+                  animation: 'shimmer 2.4s linear infinite',
+                }} />
               )}
-            </button>
-          </form>
+              <AnimatePresence mode="wait">
+                {loading ? (
+                  <motion.span
+                    key="loading"
+                    initial={{ opacity: 0, scale: 0.7 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.7 }}
+                    transition={{ duration: 0.2 }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+                  >
+                    <Loader2 size={16} style={{ animation: 'spin 0.8s linear infinite' }} />
+                    Creating account…
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="label"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 7, zIndex: 1 }}
+                  >
+                    Create Account <ArrowRight size={14} />
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
+          </motion.form>
 
-          <div className="flex items-center my-8 gap-4">
-            <div className="flex-1 h-[1px] bg-white/[0.06]" />
-            <span className="text-[11px] uppercase tracking-widest text-white/20 font-bold">Or sign up with</span>
-            <div className="flex-1 h-[1px] bg-white/[0.06]" />
-          </div>
+          {/* ── Divider ── */}
+          <motion.div variants={itemVariants} style={{
+            display: 'flex', alignItems: 'center', gap: 14, margin: '26px 0',
+          }}>
+            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
+            <span style={{
+              fontSize: 10, letterSpacing: '0.2em',
+              color: 'rgba(255,255,255,0.2)',
+              textTransform: 'uppercase', fontWeight: 600,
+            }}>or</span>
+            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
+          </motion.div>
 
-          <div className="flex justify-center">
-             <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={() => toast.error('Google Signup Failed')}
-                theme="dark"
-                shape="pill"
-                size="large"
-                width="100%"
-              />
-          </div>
+          {/* ── Google ── */}
+          <motion.div variants={itemVariants}>
+            <GoogleSignInWrapper onSuccess={handleGoogleSuccess} label="Sign up with Google" />
+          </motion.div>
 
-          <p className="text-center mt-10 text-[14px] text-white/30">
+          {/* ── Footer ── */}
+          <motion.p variants={itemVariants} style={{
+            textAlign: 'center', marginTop: 30,
+            fontSize: 13, color: 'rgba(255,255,255,0.25)',
+          }}>
             Already have an account?{' '}
-            <Link href="/login" className="text-white hover:text-indigo-400 font-medium transition-colors">
+            <Link href="/login" style={{
+              color: '#fff', fontWeight: 500, textDecoration: 'none',
+              transition: 'color 0.2s',
+            }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'rgba(59,130,246,0.85)')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#fff')}
+            >
               Sign in
             </Link>
-          </p>
+          </motion.p>
         </motion.div>
       </motion.div>
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600&display=swap');
+
+        @keyframes shimmer {
+          0%   { background-position: -200% 0; }
+          100% { background-position:  200% 0; }
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        input::placeholder { color: rgba(255,255,255,0.2); }
+        input { caret-color: rgba(59,130,246,0.9); }
+      `}</style>
     </main>
+  )
+}
+
+/* ─── Field wrapper with left icon ─── */
+function FieldWrap({
+  icon, children, style = {}
+}: {
+  icon: React.ReactNode; children: React.ReactNode; style?: React.CSSProperties
+}) {
+  return (
+    <div style={{ position: 'relative', ...style }}>
+      <span style={{
+        position: 'absolute', left: 14, top: '50%',
+        transform: 'translateY(-50%)',
+        color: 'rgba(255,255,255,0.22)',
+        display: 'flex', alignItems: 'center',
+        pointerEvents: 'none', zIndex: 1,
+      }}>
+        {icon}
+      </span>
+      {children}
+    </div>
+  )
+}
+
+/* ─── Shared input styles ─── */
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '13px 14px 13px 42px',
+  borderRadius: 12,
+  background: 'rgba(255,255,255,0.03)',
+  border: '1px solid rgba(255,255,255,0.08)',
+  color: '#fff',
+  fontSize: 14,
+  outline: 'none',
+  transition: 'border-color 0.25s, background 0.25s',
+  fontFamily: "'Outfit', sans-serif",
+}
+const inputFocusStyle: React.CSSProperties = {
+  borderColor: 'rgba(59,130,246,0.45)',
+  background: 'rgba(59,130,246,0.04)',
+}
+const inputBlurStyle: React.CSSProperties = {
+  borderColor: 'rgba(255,255,255,0.08)',
+  background: 'rgba(255,255,255,0.03)',
+}
+
+/* ─── Password strength indicator ─── */
+function PasswordStrength({ password }: { password: string }) {
+  const len = password.length
+  const hasUpper = /[A-Z]/.test(password)
+  const hasNum = /[0-9]/.test(password)
+  const hasSpecial = /[^A-Za-z0-9]/.test(password)
+  const score = (len >= 8 ? 1 : 0) + (hasUpper ? 1 : 0) + (hasNum ? 1 : 0) + (hasSpecial ? 1 : 0)
+
+  if (!password) return null
+
+  const colors = ['#ef4444', '#f97316', '#3b82f6', '#22c55e']
+  const labels = ['Weak', 'Fair', 'Good', 'Strong']
+  const color = colors[score - 1] ?? '#ef4444'
+  const label = labels[score - 1] ?? 'Weak'
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      exit={{ opacity: 0, height: 0 }}
+      style={{ overflow: 'hidden' }}
+    >
+      <div style={{ display: 'flex', gap: 4, marginTop: 2 }}>
+        {[1, 2, 3, 4].map(i => (
+          <div key={i} style={{
+            flex: 1, height: 2, borderRadius: 2,
+            background: i <= score ? color : 'rgba(255,255,255,0.07)',
+            transition: 'background 0.35s',
+          }} />
+        ))}
+      </div>
+      <p style={{
+        fontSize: 11, marginTop: 5,
+        color, letterSpacing: '0.3px',
+        transition: 'color 0.35s',
+      }}>
+        {label}
+      </p>
+    </motion.div>
+  )
+}
+
+/* ─── Custom Google button wrapper ─── */
+function GoogleSignInWrapper({
+  onSuccess, label = 'Continue with Google'
+}: {
+  onSuccess: (res: any) => void; label?: string
+}) {
+  const [hovered, setHovered] = useState(false)
+  const [pressed, setPressed] = useState(false)
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => { setHovered(false); setPressed(false) }}
+      onMouseDown={() => setPressed(true)}
+      onMouseUp={() => setPressed(false)}
+      style={{
+        position: 'relative',
+        borderRadius: 14,
+        overflow: 'hidden',
+        transition: 'transform 0.2s cubic-bezier(0.23,1,0.32,1)',
+        transform: pressed ? 'scale(0.97)' : hovered ? 'scale(1.012)' : 'scale(1)',
+      }}
+    >
+      {/* Border ring */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 14,
+        border: `1px solid ${hovered ? 'rgba(59,130,246,0.35)' : 'rgba(255,255,255,0.09)'}`,
+        transition: 'border-color 0.3s',
+        pointerEvents: 'none', zIndex: 2,
+      }} />
+      {/* Hover glow */}
+      {hovered && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          style={{
+            position: 'absolute', inset: -2, borderRadius: 16,
+            boxShadow: '0 0 24px rgba(59,130,246,0.18)',
+            pointerEvents: 'none', zIndex: 0,
+          }}
+        />
+      )}
+      {/* Visible label */}
+      <div style={{
+        position: 'absolute', inset: 0, zIndex: 1,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 11,
+        background: hovered ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.02)',
+        borderRadius: 14, transition: 'background 0.25s',
+        pointerEvents: 'none',
+      }}>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853"/>
+          <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58Z" fill="#EA4335"/>
+        </svg>
+        <span style={{
+          fontSize: 14, fontWeight: 500,
+          color: hovered ? '#fff' : 'rgba(255,255,255,0.65)',
+          transition: 'color 0.25s', letterSpacing: '0.1px',
+        }}>
+          {label}
+        </span>
+      </div>
+      {/* Real GoogleLogin — invisible, clickable */}
+      <div style={{
+        opacity: 0, height: 52,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        position: 'relative', zIndex: 3,
+      }}>
+        <GoogleLogin
+          onSuccess={onSuccess}
+          onError={() => {}}
+          theme="filled_black"
+          shape="rectangular"
+          size="large"
+          width="420"
+        />
+      </div>
+    </div>
   )
 }
