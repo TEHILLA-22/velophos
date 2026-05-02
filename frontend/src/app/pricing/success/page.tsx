@@ -6,7 +6,9 @@ import { Check, ArrowRight, Shield, Zap, Sparkles } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
 import { toast } from 'sonner'
 
-export default function SuccessPage() {
+import { Suspense } from 'react'
+
+function SuccessContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const reference = searchParams.get('reference')
@@ -229,5 +231,13 @@ export default function SuccessPage() {
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600&family=DM+Mono:wght@300;400&display=swap');
       `}</style>
     </main>
+  )
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={null}>
+      <SuccessContent />
+    </Suspense>
   )
 }
