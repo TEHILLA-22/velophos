@@ -1,8 +1,9 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { CheckCircle2, ArrowRight, Sparkles, ShieldCheck, Zap } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Check, ArrowRight, Shield, Zap, Sparkles } from 'lucide-react'
+import { API_BASE_URL } from '@/lib/api'
 import { toast } from 'sonner'
 
 export default function SuccessPage() {
@@ -20,11 +21,11 @@ export default function SuccessPage() {
     const verifyPayment = async () => {
       try {
         const token = localStorage.getItem('token')
-        const res = await fetch(`http://localhost:8000/billing/verify/${reference}`, {
+        const res = await fetch(`${API_BASE_URL}/billing/verify/${reference}`, {
           headers: { Authorization: `Bearer ${token}` }
         })
         const data = await res.json()
-        
+
         if (data.status === 'success' || data.status === 'already_verified') {
           toast.success('Subscription activated!')
         } else {
@@ -42,91 +43,191 @@ export default function SuccessPage() {
   }, [reference])
 
   const containerVariants = {
-    hidden: { opacity: 0, scale: 0.9 },
+    hidden: { opacity: 0 },
     visible: { 
       opacity: 1, 
-      scale: 1,
-      transition: { duration: 0.5, ease: 'easeOut', staggerChildren: 0.1 } 
+      transition: { staggerChildren: 0.12 } 
     }
   }
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
+    hidden: { opacity: 0, y: 24 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1] as const } }
   }
 
   return (
-    <main className="min-h-screen bg-[#000] text-white flex items-center justify-center p-6 relative overflow-hidden font-sans">
-      {/* Background Ambient Glows */}
-      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none animate-pulse" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
+    <main style={{
+      minHeight: '100vh',
+      background: '#000',
+      color: '#fff',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '80px 24px',
+      fontFamily: "'Outfit', sans-serif",
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
 
-      <motion.div
+      <motion.div 
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="w-full max-w-[500px] bg-white/[0.02] border border-white/[0.08] rounded-[40px] p-12 backdrop-blur-3xl shadow-2xl relative text-center"
+        style={{ width: '100%', maxWidth: 560, position: 'relative', zIndex: 1 }}
       >
-        {/* Shine effect */}
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent" />
+        
+        <div style={{
+          padding: '60px 48px',
+          borderRadius: 24,
+          background: 'rgba(255,255,255,0.025)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          backdropFilter: 'blur(32px)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          position: 'relative',
+          overflow: 'hidden',
+          textAlign: 'center'
+        }}>
 
-        <motion.div variants={itemVariants} className="flex justify-center mb-8">
-          <div className="relative">
-            <motion.div 
+          {/* Top Label */}
+          <motion.p variants={itemVariants} style={{
+            fontFamily: "'DM Mono', monospace",
+            fontSize: 10, letterSpacing: '0.25em',
+            textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.3)',
+            marginBottom: 40,
+          }}>
+            Status Update
+          </motion.p>
+
+          {/* Animated Checkmark Circle */}
+          <motion.div variants={itemVariants} style={{ position: 'relative', marginBottom: 40 }}>
+            <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: 'spring' }}
-              className="w-24 h-24 bg-indigo-500/20 rounded-full flex items-center justify-center text-indigo-400"
+              transition={{ delay: 0.2, type: 'spring', damping: 20 }}
+              style={{
+                width: 80, height: 80,
+                borderRadius: '50%',
+                background: '#fff',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 0 40px rgba(255,255,255,0.2)'
+              }}
             >
-              <CheckCircle2 size={48} strokeWidth={1.5} />
+              <Check size={40} strokeWidth={2.5} color="#000" />
             </motion.div>
-            <motion.div 
+            <motion.div
               animate={{ rotate: 360 }}
-              transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
-              className="absolute inset-0 border-2 border-dashed border-indigo-500/30 rounded-full scale-125" 
+              transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
+              style={{
+                position: 'absolute', inset: 0,
+                borderRadius: '50%',
+                border: '1px dashed rgba(255,255,255,0.2)',
+                transform: 'scale(1.4)'
+              }}
             />
-          </div>
-        </motion.div>
+          </motion.div>
 
-        <motion.div variants={itemVariants} className="space-y-4 mb-12">
-          <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
-            Welcome to Pro
-          </h1>
-          <p className="text-white/40 text-lg">
-            {verifying ? 'Finalizing your upgrade...' : 'Your subscription is now active. Intelligence unlocked.'}
-          </p>
-        </motion.div>
+          {/* Header */}
+          <motion.div variants={itemVariants} style={{ marginBottom: 48 }}>
+            <h1 style={{
+              fontFamily: "'Bebas Neue', cursive",
+              fontSize: 'clamp(48px, 8vw, 72px)',
+              letterSpacing: '1px',
+              lineHeight: 1,
+              color: '#fff',
+              marginBottom: 16,
+            }}>
+              PRO UNLOCKED
+            </h1>
+            <p style={{
+              fontSize: 16, lineHeight: 1.6,
+              color: 'rgba(255,255,255,0.4)',
+              maxWidth: 360, margin: '0 auto',
+            }}>
+              {verifying 
+                ? 'Finalizing your payment...' 
+                : 'Your subscription is active. Welcome to the next generation of intelligence.'}
+            </p>
+          </motion.div>
 
-        <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4 mb-12">
-          <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-4 flex flex-col items-center gap-2">
-            <Zap size={20} className="text-indigo-400" />
-            <span className="text-[13px] text-white/60 font-medium">Infinite Scale</span>
-          </div>
-          <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-4 flex flex-col items-center gap-2">
-            <ShieldCheck size={20} className="text-indigo-400" />
-            <span className="text-[13px] text-white/60 font-medium">Priority Auth</span>
-          </div>
-        </motion.div>
+          {/* Divider */}
+          <motion.div variants={itemVariants} style={{ width: '100%', height: 1, background: 'rgba(255,255,255,0.06)', marginBottom: 48 }} />
 
-        <motion.button
+          {/* Perks Grid */}
+          <motion.div variants={itemVariants} style={{ 
+            display: 'grid', 
+            gridTemplateColumns: '1fr 1fr', 
+            gap: 24, 
+            width: '100%',
+            marginBottom: 48
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+              <Zap size={20} color="rgba(255,255,255,0.6)" />
+              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', fontWeight: 500, fontFamily: "'DM Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.1em' }}>Infinite Scale</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+              <Shield size={20} color="rgba(255,255,255,0.6)" />
+              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', fontWeight: 500, fontFamily: "'DM Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.1em' }}>Priority Compute</span>
+            </div>
+          </motion.div>
+
+          {/* CTA */}
+          <motion.div variants={itemVariants} style={{ width: '100%' }}>
+            <button
+              onClick={() => router.push('/dashboard')}
+              style={{
+                width: '100%', height: 56,
+                borderRadius: 14,
+                background: '#fff', color: '#000',
+                fontSize: 15, fontWeight: 600,
+                border: 'none', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                transition: 'all 0.3s ease',
+                fontFamily: "'Outfit', sans-serif",
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'scale(1.02)'
+                e.currentTarget.style.boxShadow = '0 0 20px rgba(255,255,255,0.3)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'scale(1)'
+                e.currentTarget.style.boxShadow = 'none'
+              }}
+            >
+              Enter Dashboard
+              <ArrowRight size={16} strokeWidth={2.5} />
+            </button>
+          </motion.div>
+
+        </div>
+
+        {/* Bottom Tag */}
+        <motion.div
           variants={itemVariants}
-          onClick={() => router.push('/dashboard')}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full h-16 rounded-2xl bg-white text-black font-bold text-lg flex items-center justify-center gap-3 shadow-xl hover:bg-white/90 transition-all"
-        >
-          Enter Dashboard
-          <ArrowRight size={20} />
-        </motion.button>
-
-        <motion.div 
-          variants={itemVariants}
-          className="mt-8 flex items-center justify-center gap-2 text-white/20"
+          style={{
+            marginTop: 32,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            color: 'rgba(255,255,255,0.2)',
+          }}
         >
           <Sparkles size={14} />
-          <span className="text-xs uppercase tracking-widest font-bold">Velophos Intelligence</span>
+          <span style={{
+            fontFamily: "'DM Mono', monospace",
+            fontSize: 11, letterSpacing: '0.15em',
+            textTransform: 'uppercase',
+          }}>
+            Velophos Intelligence
+          </span>
         </motion.div>
+
       </motion.div>
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600&family=DM+Mono:wght@300;400&display=swap');
+      `}</style>
     </main>
   )
 }

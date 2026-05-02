@@ -8,7 +8,7 @@ router = APIRouter(prefix="/upload", tags=["uploads"])
 @router.post("")
 async def upload_file(file: UploadFile = File(...), user_id: int = Depends(get_current_user)):
     filename = file.filename
-    content_type = file.content_type
+    content_type = file.content_type 
     
     extracted_text = ""
     

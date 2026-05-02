@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { useRef, useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
+import { API_BASE_URL } from '@/lib/api'
 
 function OTPForm() {
   const router = useRouter()
@@ -70,7 +71,7 @@ function OTPForm() {
     setToast(null)
 
     try {
-      const res = await fetch('http://localhost:8000/auth/verify', {
+      const res = await fetch(`${API_BASE_URL}/auth/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp: otpString })
