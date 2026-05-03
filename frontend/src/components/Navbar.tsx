@@ -266,7 +266,7 @@ export default function Navbar() {
             textTransform: 'uppercase',
             textAlign: 'center',
           }}>
-            © 2025 Velophos
+            © 2026 Velophos
           </p>
         </div>
       </aside>
